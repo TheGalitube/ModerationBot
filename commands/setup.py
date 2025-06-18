@@ -10,6 +10,20 @@ class SetupView(discord.ui.View):
         self.bot = bot
         self.guild_id = str(guild_id)
         self.load_settings()
+        self.load_languages()
+
+    def load_languages(self):
+        with open('languages/de.json', 'r', encoding='utf-8') as f:
+            self.de = json.load(f)
+        with open('languages/en.json', 'r', encoding='utf-8') as f:
+            self.en = json.load(f)
+
+    def get_language(self, guild_id):
+        if os.path.exists('guild_settings.json'):
+            with open('guild_settings.json', 'r') as f:
+                settings = json.load(f)
+                return settings.get(str(guild_id), {}).get('language', 'de')
+        return 'de'
 
     def load_settings(self):
         if os.path.exists('guild_settings.json'):
@@ -73,31 +87,34 @@ class SetupView(discord.ui.View):
 
     @discord.ui.button(label="AutoMod Einstellungen", style=discord.ButtonStyle.primary, custom_id="automod_settings")
     async def automod_settings(self, interaction: discord.Interaction, button: discord.ui.Button):
+        lang = self.get_language(interaction.guild_id)
+        language = self.de if lang == "de" else self.en
+        
         embed = discord.Embed(
-            title="AutoMod Einstellungen",
-            description="Konfiguriere die AutoMod-Einstellungen",
+            title=language["settings"]["setup"]["automod"]["title"],
+            description=language["settings"]["setup"]["automod"]["description"],
             color=discord.Color.blue()
         )
         
         settings = self.settings[self.guild_id]['automod']
         embed.add_field(
-            name="Status",
-            value="Aktiviert" if settings['enabled'] else "Deaktiviert",
+            name=language["settings"]["setup"]["automod"]["status"],
+            value=language["settings"]["setup"]["automod"]["enabled"] if settings['enabled'] else language["settings"]["setup"]["automod"]["disabled"],
             inline=False
         )
         embed.add_field(
-            name="Maximale Erwähnungen",
+            name=language["settings"]["setup"]["automod"]["max_mentions"],
             value=str(settings['max_mentions']),
             inline=True
         )
         embed.add_field(
-            name="Maximaler Großbuchstabenanteil",
+            name=language["settings"]["setup"]["automod"]["max_caps"],
             value=f"{settings['max_caps']}%",
             inline=True
         )
         embed.add_field(
-            name="Gesperrte Wörter",
-            value="\n".join(settings['banned_words']) if settings['banned_words'] else "Keine",
+            name=language["settings"]["setup"]["automod"]["banned_words"],
+            value="\n".join(settings['banned_words']) if settings['banned_words'] else language["settings"]["setup"]["automod"]["none"],
             inline=False
         )
 
@@ -106,31 +123,34 @@ class SetupView(discord.ui.View):
 
     @discord.ui.button(label="Logging Einstellungen", style=discord.ButtonStyle.primary, custom_id="logging_settings")
     async def logging_settings(self, interaction: discord.Interaction, button: discord.ui.Button):
+        lang = self.get_language(interaction.guild_id)
+        language = self.de if lang == "de" else self.en
+        
         embed = discord.Embed(
-            title="Logging Einstellungen",
-            description="Konfiguriere das Logging-System",
+            title=language["settings"]["setup"]["logging"]["title"],
+            description=language["settings"]["setup"]["logging"]["description"],
             color=discord.Color.blue()
         )
         
         settings = self.settings[self.guild_id]['logging']
         embed.add_field(
-            name="Status",
-            value="Aktiviert" if settings['enabled'] else "Deaktiviert",
+            name=language["settings"]["setup"]["logging"]["status"],
+            value=language["settings"]["setup"]["logging"]["enabled"] if settings['enabled'] else language["settings"]["setup"]["logging"]["disabled"],
             inline=False
         )
         
         if settings['channel']:
             channel = interaction.guild.get_channel(settings['channel'])
             embed.add_field(
-                name="Log-Kanal",
-                value=channel.mention if channel else "Nicht gefunden",
+                name=language["settings"]["setup"]["logging"]["channel"],
+                value=channel.mention if channel else language["settings"]["setup"]["logging"]["not_found"],
                 inline=False
             )
         
         events = settings['events']
         event_list = "\n".join([f"{'✅' if enabled else '❌'} {event}" for event, enabled in events.items()])
         embed.add_field(
-            name="Protokollierte Ereignisse",
+            name=language["settings"]["setup"]["logging"]["events"],
             value=event_list,
             inline=False
         )
@@ -293,9 +313,10 @@ class Setup(commands.Cog):
                 return settings.get(str(guild_id), {}).get('language', 'de')
         return 'de'
 
-    @app_commands.command(name="setup", description="Öffnet das Setup-Menü für den Bot")
+    @app_commands.command(name="setup", description="Opens the setup menu for the bot")
     @app_commands.checks.has_permissions(administrator=True)
     async def setup(self, interaction: discord.Interaction):
+        """Opens the setup menu for the bot"""
         lang = self.get_language(interaction.guild_id)
         language = self.de if lang == "de" else self.en
 

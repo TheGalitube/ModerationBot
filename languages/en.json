@@ -16,6 +16,175 @@
             "no_permission": "You don't have permission to mute users"
         }
     },
+    "warnings": {
+        "warn": {
+            "success": "Warning issued",
+            "user_warned": "has been warned",
+            "reason": "Reason",
+            "moderator": "Moderator",
+            "warning_number": "Warning #",
+            "total_warnings": "Total Warnings",
+            "user_notification": "You have been warned on {guild}",
+            "warning_reason": "Reason: {reason}",
+            "total_count": "Total Count",
+            "log_title": "Warning issued",
+            "user": "User",
+            "automatic_punishment": "Automatic punishment after {count} warnings",
+            "muted_for": "has been muted for {duration} hours",
+            "kicked": "has been kicked",
+            "could_not_mute": "Could not mute the user",
+            "could_not_kick": "Could not kick the user"
+        },
+        "warnings": {
+            "no_warnings": "No warnings",
+            "no_warnings_user": "has no warnings",
+            "user_warnings": "Warnings for {user}",
+            "warning_info": "Warning #{id}",
+            "warning_details": "Reason: {reason}\nModerator: {moderator}\nDate: {date}",
+            "unknown_moderator": "Unknown"
+        },
+        "delwarn": {
+            "error": "Error",
+            "no_warnings_user": "has no warnings",
+            "warning_not_found": "Warning #{id} was not found",
+            "warning_deleted": "Warning deleted",
+            "warning_removed": "Warning #{id} from {user} has been deleted",
+            "log_title": "Warning deleted"
+        },
+        "clearwarnings": {
+            "no_warnings": "No warnings",
+            "no_warnings_to_clear": "has no warnings to clear",
+            "warnings_cleared": "Warnings cleared",
+            "all_warnings_cleared": "All warnings from {user} have been cleared",
+            "log_title": "All warnings cleared"
+        },
+        "settings": {
+            "title": "Warning settings updated",
+            "max_warnings": "Maximum warnings",
+            "log_channel": "Log channel",
+            "none": "None",
+            "user_notification": "User notification",
+            "enabled": "Enabled",
+            "disabled": "Disabled"
+        },
+        "punishment": {
+            "title": "Warning punishment set",
+            "warning_count": "Warning count",
+            "punishment_type": "Punishment",
+            "duration": "Duration",
+            "duration_hours": "{duration} hours",
+            "mute_duration_required": "A duration must be specified for a mute punishment"
+        }
+    },
+    "roles": {
+        "autorole": {
+            "set": "Autorole set",
+            "new_members_get": "New members will automatically receive the role {role}",
+            "removed": "Autorole removed",
+            "no_autorole": "New members will no longer receive an automatic role",
+            "not_set": "No autorole set",
+            "no_autorole_configured": "No automatic role is configured"
+        },
+        "selfrole": {
+            "error": "Error",
+            "no_roles": "You must specify at least one role",
+            "panel_created": "Self-role panel created",
+            "panel_created_success": "The panel has been successfully created in {channel}"
+        },
+        "roleinfo": {
+            "title": "Role information: {role}",
+            "id": "ID",
+            "color": "Color",
+            "position": "Position",
+            "mentionable": "Mentionable",
+            "hoist": "Hoist",
+            "managed": "Managed by Integration",
+            "members": "Members",
+            "permissions": "Permissions",
+            "created_at": "Created at"
+        },
+        "rolemembers": {
+            "title": "Members of role {role}",
+            "no_members": "This role has no members",
+            "member_count": "Count: {count}",
+            "members_list": "Members",
+            "and_more": "... and {count} more"
+        },
+        "addrole": {
+            "error": "Error",
+            "already_has_role": "already has the role {role}",
+            "role_added": "Role added",
+            "role_added_to_user": "The role {role} has been added to {user}",
+            "no_permission_grant": "I don't have permission to grant this role",
+            "error_occurred": "An error occurred: {error}"
+        },
+        "removerole": {
+            "error": "Error",
+            "doesnt_have_role": "doesn't have the role {role}",
+            "role_removed": "Role removed",
+            "role_removed_from_user": "The role {role} has been removed from {user}",
+            "no_permission_remove": "I don't have permission to remove this role",
+            "error_occurred": "An error occurred: {error}"
+        },
+        "rolesettings": {
+            "title": "Role settings",
+            "autorole": "Autorole",
+            "role_not_found": "Role not found",
+            "not_set": "Not set",
+            "selfrole_panels": "Self-role panels"
+        },
+        "button": {
+            "role_removed": "❌ The role {role} has been removed",
+            "role_added": "✅ The role {role} has been added"
+        }
+    },
+    "polls": {
+        "create_poll": {
+            "title": "Create poll",
+            "question": "Question",
+            "question_placeholder": "Enter your question",
+            "options": "Options",
+            "options_placeholder": "Option 1, Option 2, Option 3...",
+            "duration": "Duration",
+            "duration_placeholder": "e.g. 1h, 30m, 2d",
+            "description": "Description (optional)",
+            "description_placeholder": "Additional description of the poll",
+            "poll_created": "Poll created",
+            "poll_created_by": "Created by {user}",
+            "ends_at": "Ends at {time}",
+            "vote_with_reactions": "Vote using the reactions",
+            "invalid_duration": "Invalid time format. Use e.g. 1h, 30m, 2d",
+            "min_options": "At least 2 options required",
+            "max_options": "Maximum 10 options allowed"
+        },
+        "quick_poll": {
+            "title": "Create quick poll",
+            "question": "Question",
+            "question_placeholder": "Enter your yes/no question",
+            "duration": "Duration",
+            "duration_placeholder": "e.g. 1h, 30m, 2d",
+            "poll_created": "Quick poll created",
+            "poll_created_by": "Created by {user}",
+            "ends_at": "Ends at {time}",
+            "vote_with_reactions": "Vote using the reactions",
+            "invalid_duration": "Invalid time format. Use e.g. 1h, 30m, 2d"
+        },
+        "poll_results": {
+            "title": "Poll results",
+            "question": "Question",
+            "total_votes": "Total votes: {count}",
+            "option_votes": "{option}: {votes} votes ({percentage}%)",
+            "time_remaining": "Time remaining: {time}",
+            "poll_ended": "Poll ended",
+            "final_results": "Final results",
+            "no_votes": "No votes cast",
+            "poll_not_found": "Poll not found"
+        },
+        "reactions": {
+            "duplicate_reaction": "You have already voted for this option",
+            "reaction_removed": "Your vote has been removed"
+        }
+    },
     "settings": {
         "language": {
             "changed": "Language has been changed to English",
@@ -124,14 +293,20 @@
             "moderation": "Moderation",
             "tickets": "Tickets",
             "utility": "Utility",
-            "admin": "Admin"
+            "admin": "Admin",
+            "warnings": "Warnings",
+            "roles": "Roles",
+            "polls": "Polls"
         },
         "buttons": {
             "main_menu": "Main Menu",
             "moderation": "Moderation",
             "tickets": "Tickets",
             "utility": "Utility",
-            "admin": "Admin"
+            "admin": "Admin",
+            "warnings": "Warnings",
+            "roles": "Roles",
+            "polls": "Polls"
         }
     },
     "general": {

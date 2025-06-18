@@ -50,46 +50,45 @@ class Settings(commands.Cog):
     def get_language(self, guild_id):
         return self.guild_settings.get(str(guild_id), {}).get('language', 'de')
 
-    @app_commands.command(name="language", description="Ändert die Sprache des Bots")
+    @app_commands.command(name="language", description="Changes the bot's language")
     @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.describe(language="Select the language for the bot")
     @app_commands.choices(language=[
         app_commands.Choice(name="Deutsch", value="de"),
         app_commands.Choice(name="English", value="en")
     ])
-    async def language(self, interaction: discord.Interaction, language: str):
-        await interaction.response.defer()
+    async def language(self, interaction: discord.Interaction, language: app_commands.Choice[str]):
+        """Changes the bot's language"""
+        lang = self.get_language(interaction.guild_id)
+        current_language = self.de if lang == "de" else self.en
         
         guild_id = str(interaction.guild_id)
-        if guild_id not in self.guild_settings:
-            self.guild_settings[guild_id] = {}
         
-        # Setze die neue Sprache
-        self.guild_settings[guild_id]['language'] = language.lower()
+        # Lade oder erstelle guild_settings
+        if os.path.exists('guild_settings.json'):
+            with open('guild_settings.json', 'r') as f:
+                guild_settings = json.load(f)
+        else:
+            guild_settings = {}
         
-        # Speichere die Einstellungen, aber lade noch nicht neu
+        # Setze Sprache
+        if guild_id not in guild_settings:
+            guild_settings[guild_id] = {}
+        
+        guild_settings[guild_id]['language'] = language.value
+        
+        # Speichere Einstellungen
         with open('guild_settings.json', 'w') as f:
-            json.dump(self.guild_settings, f, indent=4)
+            json.dump(guild_settings, f, indent=4)
         
-        # Lade alle Module neu, damit die Sprachänderung sofort wirksam wird
-        await self.apply_settings_changes()
+        # Lade neue Sprache für Bestätigung
+        new_lang = self.de if language.value == "de" else self.en
         
-        # Synchronisiere die Befehle mit Discord
-        try:
-            await self.bot.tree.sync()
-        except Exception as e:
-            print(f"Fehler beim Synchronisieren der Befehle: {e}")
-        
-        # Lade die aktualisierten Sprachdateien
-        self.load_languages()
-        
-        # Hole die neue Spracheinstellung
-        lang_dict = self.de if language.lower() == "de" else self.en
-
         embed = discord.Embed(
-            title=lang_dict["settings"]["language"]["changed"],
+            title=new_lang["settings"]["language"]["changed"],
             color=discord.Color.green()
         )
-        await interaction.followup.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
     @language.error
     async def language_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):

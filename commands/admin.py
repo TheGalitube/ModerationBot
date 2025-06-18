@@ -23,9 +23,10 @@ class Admin(commands.Cog):
                 return settings.get(str(guild_id), {}).get('language', 'de')
         return 'de'
 
-    @app_commands.command(name="reload", description="Lädt Module neu, ohne den Bot neu zu starten")
+    @app_commands.command(name="reload", description="Reload modules without restarting the bot")
     @app_commands.checks.has_permissions(administrator=True)
     async def reload(self, interaction: discord.Interaction, module: str = None):
+        """Reload modules without restarting the bot"""
         lang = self.get_language(interaction.guild_id)
         language = self.de if lang == "de" else self.en
         
@@ -36,14 +37,14 @@ class Admin(commands.Cog):
             try:
                 await self.bot.reload_extension(f"commands.{module}")
                 embed = discord.Embed(
-                    title="Modul neu geladen",
+                    title=language["admin"]["reload"]["single_success"],
                     description=f"Das Modul `{module}` wurde erfolgreich neu geladen.",
                     color=discord.Color.green()
                 )
                 await interaction.followup.send(embed=embed)
             except Exception as e:
                 embed = discord.Embed(
-                    title="Fehler",
+                    title=language["admin"]["reload"]["error"],
                     description=f"Fehler beim Neuladen des Moduls `{module}`: {str(e)}",
                     color=discord.Color.red()
                 )
@@ -69,15 +70,16 @@ class Admin(commands.Cog):
                 results.append(f"❌ Fehler beim Synchronisieren der Befehle: {str(e)}")
             
             embed = discord.Embed(
-                title="Module neu geladen",
+                title=language["admin"]["reload"]["success"],
                 description="\n".join(results),
                 color=discord.Color.green()
             )
             await interaction.followup.send(embed=embed)
 
-    @app_commands.command(name="sync", description="Synchronisiert die Befehle mit Discord")
+    @app_commands.command(name="sync", description="Sync commands with Discord")
     @app_commands.checks.has_permissions(administrator=True)
     async def sync(self, interaction: discord.Interaction):
+        """Sync commands with Discord"""
         lang = self.get_language(interaction.guild_id)
         language = self.de if lang == "de" else self.en
         
@@ -86,14 +88,14 @@ class Admin(commands.Cog):
         try:
             synced = await self.bot.tree.sync()
             embed = discord.Embed(
-                title="Befehle synchronisiert",
+                title=language["admin"]["sync"]["success"],
                 description=f"{len(synced)} Befehle wurden erfolgreich synchronisiert!",
                 color=discord.Color.green()
             )
             await interaction.followup.send(embed=embed)
         except Exception as e:
             embed = discord.Embed(
-                title="Fehler",
+                title=language["admin"]["sync"]["error"],
                 description=f"Fehler beim Synchronisieren der Befehle: {str(e)}",
                 color=discord.Color.red()
             )

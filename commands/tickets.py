@@ -22,15 +22,15 @@ class TicketView(discord.ui.View):
         with open('guild_settings.json', 'r') as f:
             self.settings = json.load(f)
 
-    @discord.ui.button(label="Ticket erstellen", style=discord.ButtonStyle.primary, custom_id="create_ticket")
+    @discord.ui.button(label="Create Ticket", style=discord.ButtonStyle.primary, custom_id="create_ticket")
     async def create_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
         settings = self.settings[self.guild_id]['tickets']
         panel = next((p for p in settings['panels'] if p['id'] == self.panel_id), None)
         
         if not panel:
             embed = discord.Embed(
-                title="Fehler",
-                description="Panel nicht gefunden",
+                title="Error",
+                description="Panel not found",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -43,12 +43,15 @@ class TicketView(discord.ui.View):
                 category = await interaction.guild.fetch_channel(panel['category_id'])
             except:
                 embed = discord.Embed(
-                    title="Fehler",
-                    description="Kategorie nicht gefunden. Bitte kontaktiere einen Administrator.",
+                    title="Error",
+                    description="Category not found. Please contact an administrator.",
                     color=discord.Color.red()
                 )
                 await interaction.response.send_message(embed=embed, ephemeral=True)
                 return
+
+        if category.type != discord.ChannelType.category:
+            raise ValueError("The specified channel is not a category")
 
         # Erstelle das Ticket
         channel = await interaction.guild.create_text_channel(
@@ -67,12 +70,12 @@ class TicketView(discord.ui.View):
 
         # Erstelle das Ticket-Embed
         embed = discord.Embed(
-            title="Ticket erstellt",
-            description=f"Ticket von {interaction.user.mention}",
+            title="Ticket Created",
+            description=f"Ticket from {interaction.user.mention}",
             color=discord.Color.green()
         )
-        embed.add_field(name="Kategorie", value=panel['name'], inline=False)
-        embed.add_field(name="Erstellt am", value=datetime.now().strftime("%d.%m.%Y %H:%M"), inline=False)
+        embed.add_field(name="Category", value=panel['name'], inline=False)
+        embed.add_field(name="Created at", value=datetime.now().strftime("%d.%m.%Y %H:%M"), inline=False)
 
         # Erstelle die Ticket-Buttons
         view = TicketControlView(self.bot, self.guild_id, channel.id)
@@ -83,8 +86,8 @@ class TicketView(discord.ui.View):
         await channel.send(embed=embed, view=view)
         
         embed = discord.Embed(
-            title="Ticket erstellt",
-            description=f"Dein Ticket wurde erstellt: {channel.mention}",
+            title="Ticket Created",
+            description=f"Your ticket has been created: {channel.mention}",
             color=discord.Color.green()
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -102,7 +105,7 @@ class TicketControlView(discord.ui.View):
         with open('guild_settings.json', 'r') as f:
             self.settings = json.load(f)
 
-    @discord.ui.button(label="Ticket schließen", style=discord.ButtonStyle.danger, custom_id="close_ticket")
+    @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.danger, custom_id="close_ticket")
     async def close_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
         channel = interaction.channel
         if not channel or not channel.name.startswith("ticket-"):
@@ -118,19 +121,19 @@ class TicketControlView(discord.ui.View):
             if len(ticket_parts) >= 3:
                 ticket_id_match = ticket_parts[-1]  # Die letzte Zahl als ID
         except:
-            ticket_id_match = "Unbekannt"
+            ticket_id_match = "Unknown"
 
         # Finde den Ticket-Ersteller
         ticket_opener = None
         ticket_opened_at = None
         async for message in channel.history(limit=1, oldest_first=True):
             for embed in message.embeds:
-                if "Ticket von" in embed.description:
+                if "Ticket from" in embed.description:
                     # Extrahiere den Benutzer aus der Beschreibung
                     for field in embed.fields:
-                        if field.name == "Erstellt am":
+                        if field.name == "Created at":
                             ticket_opened_at = field.value
-                    opener_mention = embed.description.split("Ticket von ")[1]
+                    opener_mention = embed.description.split("Ticket from ")[1]
                     if opener_mention:
                         for member in channel.guild.members:
                             if member.mention == opener_mention:
@@ -142,19 +145,19 @@ class TicketControlView(discord.ui.View):
         ticket_claimed_by = "Not claimed"
         
         # Benutzer informieren
-        await channel.send("Ticket wird geschlossen und Transcript wird erstellt...")
+        await channel.send("Ticket is being closed and transcript is being created...")
 
         # Erstelle Transcript
         transcript = []
         try:
             async for message in channel.history(limit=None, oldest_first=True):
-                content = message.content or "*Keine Textnachricht*"
-                attachments = ", ".join([f"[Anhang: {a.filename}]" for a in message.attachments])
+                content = message.content or "*No text message*"
+                attachments = ", ".join([f"[Attachment: {a.filename}]" for a in message.attachments])
                 if attachments:
                     content += f" {attachments}"
                 transcript.append(f"[{message.created_at.strftime('%Y-%m-%d %H:%M:%S')}] {message.author}: {content}")
         except Exception as e:
-            transcript.append(f"Fehler beim Erstellen des Transcripts: {e}")
+            transcript.append(f"Error creating transcript: {e}")
 
         # Sende Transcript zum konfigurierten Kanal
         try:
@@ -179,14 +182,14 @@ class TicketControlView(discord.ui.View):
                     # Ticket ID
                     embed.add_field(
                         name="🎫 Ticket ID",
-                        value=ticket_id_match or "Unbekannt",
+                        value=ticket_id_match or "Unknown",
                         inline=True
                     )
                     
                     # Opened By
                     embed.add_field(
                         name="✅ Opened By",
-                        value=ticket_opener.mention if ticket_opener else "Unbekannt",
+                        value=ticket_opener.mention if ticket_opener else "Unknown",
                         inline=True
                     )
                     
@@ -233,20 +236,20 @@ class TicketControlView(discord.ui.View):
                     
                     # Informiere den Benutzer über erfolgreiches Transcript
                     try:
-                        await interaction.followup.send("Transcript wurde erstellt und gespeichert!")
+                        await interaction.followup.send("Transcript has been created and saved!")
                     except:
                         pass
         except Exception as e:
-            print(f"Fehler beim Senden des Transcripts: {e}")
+            print(f"Error sending transcript: {e}")
 
         # Ticket-Kanal nach kurzer Verzögerung löschen
         await asyncio.sleep(3)
         try:
             await channel.delete()
         except Exception as e:
-            print(f"Fehler beim Löschen des Ticket-Kanals: {e}")
+            print(f"Error deleting ticket channel: {e}")
             try:
-                await interaction.followup.send(f"Fehler beim Löschen des Kanals: {e}")
+                await interaction.followup.send(f"Error deleting channel: {e}")
             except:
                 pass
 
@@ -255,7 +258,7 @@ class TranscriptView(discord.ui.View):
         super().__init__(timeout=None)
         self.filename = filename
     
-    @discord.ui.button(label="Transcript anzeigen", style=discord.ButtonStyle.primary, emoji="📄", custom_id="view_transcript")
+    @discord.ui.button(label="View Transcript", style=discord.ButtonStyle.primary, emoji="📄", custom_id="view_transcript")
     async def view_transcript(self, interaction: discord.Interaction, button: discord.ui.Button):
         # Hier suchen wir nach der Nachricht, die das Transcript enthält
         for attachment in interaction.message.attachments:
@@ -299,13 +302,13 @@ class TranscriptView(discord.ui.View):
                     return
                 except Exception as e:
                     await interaction.response.send_message(
-                        f"Fehler beim Lesen des Transcripts: {e}",
+                        f"Error reading transcript: {e}",
                         ephemeral=True
                     )
                     return
         
         await interaction.response.send_message(
-            "Transcript konnte nicht gefunden werden.",
+            "Transcript could not be found.",
             ephemeral=True
         )
 
@@ -316,33 +319,27 @@ class CancelCloseView(discord.ui.View):
         self.reason = reason
         self.cancelled = False
         
-    @discord.ui.button(label="Abbrechen", style=discord.ButtonStyle.danger, emoji="❌")
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger, emoji="❌")
     async def cancel_close(self, interaction: discord.Interaction, button: discord.ui.Button):
         # Überprüfen, ob der Benutzer berechtigt ist
-        if interaction.user.id != self.author_id and not interaction.user.guild_permissions.administrator:
-            await interaction.response.send_message(
-                "Du bist nicht berechtigt, die Schließung abzubrechen.",
-                ephemeral=True
+        if interaction.user.id != self.author_id:
+            embed = discord.Embed(
+                title="Not Authorized",
+                description="You are not authorized to cancel this ticket closure.",
+                color=discord.Color.red()
             )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
             return
             
-        # Breche den Timer ab
-        self.cancelled = True
+        # Stoppe den Timer
+        self.cancel_timer()
         
-        # Bestätige dem Benutzer
         embed = discord.Embed(
-            title="Schließung abgebrochen",
-            description="Die geplante Ticket-Schließung wurde abgebrochen.",
+            title="Closure Cancelled",
+            description="The scheduled ticket closure has been cancelled.",
             color=discord.Color.green()
         )
-        
-        # Deaktiviere den Button
-        button.disabled = True
-        button.label = "Abgebrochen"
-        button.emoji = "✅"
-        button.style = discord.ButtonStyle.secondary
-        
-        await interaction.response.edit_message(embed=embed, view=self)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
         
     async def on_timeout(self):
         # Dieser Code wird automatisch nach Ablauf des Timeouts ausgeführt
@@ -418,171 +415,158 @@ class TicketSetupView(discord.ui.View):
             except Exception:
                 pass  # Fehler ignorieren, da wir nicht wissen, welche Module geladen sind
 
-    @discord.ui.button(label="Transcript-Kanal setzen", style=discord.ButtonStyle.primary, custom_id="set_transcript", row=0)
+    @discord.ui.button(label="Set Transcript Channel", style=discord.ButtonStyle.primary, custom_id="set_transcript", row=0)
     async def set_transcript(self, interaction: discord.Interaction, button: discord.ui.Button):
-        modal = SetTranscriptModal(self)
-        await interaction.response.send_modal(modal)
+        await interaction.response.send_modal(SetTranscriptModal(self))
 
-    @discord.ui.button(label="Support-Rollen setzen", style=discord.ButtonStyle.primary, custom_id="set_roles", row=0)
+    @discord.ui.button(label="Set Support Roles", style=discord.ButtonStyle.primary, custom_id="set_roles", row=0)
     async def set_roles(self, interaction: discord.Interaction, button: discord.ui.Button):
-        modal = SetRolesModal(self)
-        await interaction.response.send_modal(modal)
+        await interaction.response.send_modal(SetRolesModal(self))
 
-    @discord.ui.button(label="Panel hinzufügen", style=discord.ButtonStyle.success, custom_id="add_panel", row=1)
+    @discord.ui.button(label="Add Panel", style=discord.ButtonStyle.success, custom_id="add_panel", row=1)
     async def add_panel(self, interaction: discord.Interaction, button: discord.ui.Button):
-        modal = AddPanelModal(self)
-        await interaction.response.send_modal(modal)
+        await interaction.response.send_modal(AddPanelModal(self))
 
-    @discord.ui.button(label="Panel bearbeiten", style=discord.ButtonStyle.primary, custom_id="edit_panel", row=1)
+    @discord.ui.button(label="Edit Panel", style=discord.ButtonStyle.primary, custom_id="edit_panel", row=1)
     async def edit_panel(self, interaction: discord.Interaction, button: discord.ui.Button):
         settings = self.settings[self.guild_id]['tickets']
-        if not settings['panels']:
+        panels = settings.get('panels', [])
+        
+        if not panels:
             embed = discord.Embed(
-                title="Keine Panels",
-                description="Es sind keine Panels vorhanden, die bearbeitet werden können",
+                title="No Panels",
+                description="There are no panels available to edit",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
             return
-        
-        # Zeige zunächst eine Auswahl der vorhandenen Panels
+
+        # Erstelle die Auswahloptionen
         options = []
-        for panel in settings['panels']:
-            options.append(
-                discord.SelectOption(
-                    label=f"Panel #{panel['id']} - {panel['name']}",
-                    value=panel['id'],
-                    description=panel['description'][:100] if len(panel['description']) > 100 else panel['description']
-                )
+        for panel in panels:
+            option = discord.SelectOption(
+                label=f"Panel #{panel['id']} - {panel['name']}",
+                value=panel['id'],
+                description=panel['description'][:100] if len(panel['description']) > 100 else panel['description']
             )
-        
+            options.append(option)
+
         # Erstelle das Select-Menü
         select = discord.ui.Select(
-            placeholder="Wähle ein Panel zum Bearbeiten",
+            placeholder="Choose a panel to edit",
             options=options,
-            custom_id="select_panel_to_edit"
+            custom_id="edit_panel_select"
         )
-        
-        # Callback-Funktion für das Select-Menü
+
         async def select_callback(interaction: discord.Interaction):
-            panel_id = select.values[0]
-            panel = next((p for p in self.settings[self.guild_id]['tickets']['panels'] if p['id'] == panel_id), None)
-            
-            if panel:
-                modal = EditPanelModal(self, panel)
-                await interaction.response.send_modal(modal)
+            selected_panel = next((p for p in panels if p['id'] == select.values[0]), None)
+            if selected_panel:
+                await interaction.response.send_modal(EditPanelModal(self, selected_panel))
             else:
                 embed = discord.Embed(
-                    title="Fehler",
-                    description="Panel nicht gefunden",
+                    title="Error",
+                    description="Panel not found",
                     color=discord.Color.red()
                 )
                 await interaction.response.send_message(embed=embed, ephemeral=True)
-        
+
         select.callback = select_callback
         view = discord.ui.View()
         view.add_item(select)
-        
-        await interaction.response.send_message("Wähle ein Panel zum Bearbeiten:", view=view, ephemeral=True)
+        await interaction.response.send_message("Select a panel to edit:", view=view, ephemeral=True)
 
-    @discord.ui.button(label="Panel löschen", style=discord.ButtonStyle.danger, custom_id="delete_panel", row=1)
+    @discord.ui.button(label="Delete Panel", style=discord.ButtonStyle.danger, custom_id="delete_panel", row=1)
     async def delete_panel(self, interaction: discord.Interaction, button: discord.ui.Button):
         settings = self.settings[self.guild_id]['tickets']
-        if not settings['panels']:
+        panels = settings.get('panels', [])
+        
+        if not panels:
             embed = discord.Embed(
-                title="Keine Panels",
-                description="Es sind keine Panels vorhanden, die gelöscht werden können",
+                title="No Panels",
+                description="There are no panels available to delete",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
             return
-        
-        # Zeige zunächst eine Auswahl der vorhandenen Panels
+
+        # Erstelle die Auswahloptionen
         options = []
-        for panel in settings['panels']:
-            options.append(
-                discord.SelectOption(
-                    label=f"Panel #{panel['id']} - {panel['name']}",
-                    value=panel['id'],
-                    description=panel['description'][:100] if len(panel['description']) > 100 else panel['description']
-                )
+        for panel in panels:
+            option = discord.SelectOption(
+                label=f"Panel #{panel['id']} - {panel['name']}",
+                value=panel['id'],
+                description=panel['description'][:100] if len(panel['description']) > 100 else panel['description']
             )
-        
+            options.append(option)
+
         # Erstelle das Select-Menü
         select = discord.ui.Select(
-            placeholder="Wähle ein Panel zum Löschen",
+            placeholder="Choose a panel to delete",
             options=options,
-            custom_id="select_panel_to_delete"
+            custom_id="delete_panel_select"
         )
-        
-        # Callback-Funktion für das Select-Menü
+
         async def select_callback(interaction: discord.Interaction):
-            panel_id = select.values[0]
-            panel = next((p for p in self.settings[self.guild_id]['tickets']['panels'] if p['id'] == panel_id), None)
-            
-            if panel:
-                # Erstelle eine Bestätigungsansicht
-                confirm_view = ConfirmDeleteView(self, panel)
-                
+            selected_panel = next((p for p in panels if p['id'] == select.values[0]), None)
+            if selected_panel:
+                # Zeige Bestätigungsdialog
                 embed = discord.Embed(
-                    title="Panel löschen",
-                    description=f"Bist du sicher, dass du das Panel **#{panel['id']} - {panel['name']}** löschen möchtest?\n\nDieser Vorgang kann nicht rückgängig gemacht werden!",
+                    title="Delete Panel",
+                    description=f"Are you sure you want to delete panel **#{selected_panel['id']} - {selected_panel['name']}**?\n\nThis action cannot be undone!",
                     color=discord.Color.red()
                 )
-                
-                await interaction.response.send_message(embed=embed, view=confirm_view, ephemeral=True)
+                view = ConfirmDeleteView(self, selected_panel)
+                await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
             else:
                 embed = discord.Embed(
-                    title="Fehler",
-                    description="Panel nicht gefunden",
+                    title="Error",
+                    description="Panel not found",
                     color=discord.Color.red()
                 )
                 await interaction.response.send_message(embed=embed, ephemeral=True)
-        
+
         select.callback = select_callback
         view = discord.ui.View()
         view.add_item(select)
-        
-        await interaction.response.send_message("Wähle ein Panel zum Löschen:", view=view, ephemeral=True)
+        await interaction.response.send_message("Select a panel to delete:", view=view, ephemeral=True)
 
-    @discord.ui.button(label="Panels anzeigen", style=discord.ButtonStyle.secondary, custom_id="show_panels", row=2)
+    @discord.ui.button(label="Show Panels", style=discord.ButtonStyle.secondary, custom_id="show_panels", row=2)
     async def show_panels(self, interaction: discord.Interaction, button: discord.ui.Button):
         settings = self.settings[self.guild_id]['tickets']
-        if not settings['panels']:
+        panels = settings.get('panels', [])
+        
+        if not panels:
             embed = discord.Embed(
-                title="Keine Panels",
-                description="Es sind keine Panels vorhanden",
-                color=discord.Color.red()
+                title="No Panels",
+                description="There are no panels available",
+                color=discord.Color.blue()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
             return
 
-        # Aktualisiere Kategorien für Panels, die es brauchen
-        self.update_panel_categories(interaction.guild)
-
         embed = discord.Embed(
-            title="Vorhandene Panels",
-            description="Liste aller Ticket-Panels mit ihren IDs",
+            title="Available Panels",
+            description="List of all ticket panels with their IDs",
             color=discord.Color.blue()
         )
 
-        for panel in settings['panels']:
+        for panel in panels:
             # Prüfe, ob das alte oder neue Format verwendet wird
             category_display = ""
             if 'category_id' in panel and panel['category_id'] != 0:
-                category_display = f"**Kategorie:** <#{panel['category_id']}>"
+                category_display = f"**Category:** <#{panel['category_id']}>"
             elif 'old_category' in panel:
-                category_display = f"**Kategorie (Name):** {panel['old_category']} (benötigt Update)"
+                category_display = f"**Category (Name):** {panel['old_category']} (needs update)"
             elif 'category' in panel:
-                category_display = f"**Kategorie (Name):** {panel['category']} (benötigt Update)"
+                category_display = f"**Category (Name):** {panel['category']} (needs update)"
             
             embed.add_field(
                 name=f"📋 Panel #{panel['id']} - {panel['name']}",
-                value=f"**Panel ID:** `{panel['id']}`\n**Beschreibung:** {panel['description']}\n{category_display}",
+                value=f"**Panel ID:** `{panel['id']}`\n**Description:** {panel['description']}\n{category_display}",
                 inline=False
             )
             
-        embed.set_footer(text="Verwende die Panel-ID mit dem /ticketpanel Befehl")
+        embed.set_footer(text="Use the panel ID with the /ticketpanel command")
         await interaction.response.send_message(embed=embed, ephemeral=True)
     
     def update_panel_categories(self, guild):
@@ -605,14 +589,14 @@ class TicketSetupView(discord.ui.View):
             if updated:
                 self.save_settings()
 
-class SetTranscriptModal(discord.ui.Modal, title="Transcript-Kanal setzen"):
+class SetTranscriptModal(discord.ui.Modal, title="Set Transcript Channel"):
     def __init__(self, view):
         super().__init__()
         self.view = view
 
     channel_id = discord.ui.TextInput(
-        label="Kanal-ID",
-        placeholder="Geben Sie die ID des Transcript-Kanals ein",
+        label="Channel ID",
+        placeholder="Enter the transcript channel ID",
         required=True
     )
 
@@ -621,85 +605,104 @@ class SetTranscriptModal(discord.ui.Modal, title="Transcript-Kanal setzen"):
             channel_id = int(self.channel_id.value)
             channel = interaction.guild.get_channel(channel_id)
             if not channel:
-                try:
-                    channel = await interaction.guild.fetch_channel(channel_id)
-                except:
-                    raise ValueError("Kanal nicht gefunden")
+                channel = await interaction.guild.fetch_channel(channel_id)
+            
+            if not channel:
+                embed = discord.Embed(
+                    title="Error",
+                    description="Channel not found",
+                    color=discord.Color.red()
+                )
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+                return
 
+            if channel.type != discord.ChannelType.category:
+                raise ValueError("The specified channel is not a category")
+
+            # Speichere die Einstellung
             self.view.settings[self.view.guild_id]['tickets']['transcript_channel'] = channel_id
             self.view.save_settings()
 
             embed = discord.Embed(
-                title="Transcript-Kanal gesetzt",
-                description=f"Der Transcript-Kanal wurde auf {channel.mention} gesetzt",
+                title="Transcript Channel Set",
+                description=f"The transcript channel has been set to {channel.mention}",
                 color=discord.Color.green()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
-        except ValueError as e:
+        except Exception as e:
             embed = discord.Embed(
-                title="Fehler",
+                title="Error",
                 description=str(e),
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
-class SetRolesModal(discord.ui.Modal, title="Support-Rollen setzen"):
+class SetRolesModal(discord.ui.Modal, title="Set Support Roles"):
     def __init__(self, view):
         super().__init__()
         self.view = view
 
     role_ids = discord.ui.TextInput(
-        label="Rollen-IDs",
-        placeholder="Geben Sie die IDs der Support-Rollen ein (durch Komma getrennt)",
+        label="Role IDs",
+        placeholder="Enter the support role IDs (comma separated)",
         required=True
     )
 
     async def on_submit(self, interaction: discord.Interaction):
         try:
-            role_ids = [int(id.strip()) for id in self.role_ids.value.split(',')]
+            role_id_list = [int(rid.strip()) for rid in self.role_ids.value.split(',')]
             roles = []
-            for role_id in role_ids:
+            
+            for role_id in role_id_list:
                 role = interaction.guild.get_role(role_id)
-                if not role:
-                    raise ValueError(f"Rolle mit ID {role_id} nicht gefunden")
-                roles.append(role)
+                if role:
+                    roles.append(role)
+                else:
+                    embed = discord.Embed(
+                        title="Error",
+                        description=f"Role with ID {role_id} not found",
+                        color=discord.Color.red()
+                    )
+                    await interaction.response.send_message(embed=embed, ephemeral=True)
+                    return
 
-            self.view.settings[self.view.guild_id]['tickets']['support_roles'] = role_ids
+            # Speichere die Einstellung
+            self.view.settings[self.view.guild_id]['tickets']['support_roles'] = role_id_list
             self.view.save_settings()
 
             embed = discord.Embed(
-                title="Support-Rollen gesetzt",
-                description=f"Die Support-Rollen wurden auf {', '.join(role.mention for role in roles)} gesetzt",
+                title="Support Roles Set",
+                description=f"The support roles have been set to {', '.join(role.mention for role in roles)}",
                 color=discord.Color.green()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
-        except ValueError as e:
+        except Exception as e:
             embed = discord.Embed(
-                title="Fehler",
+                title="Error",
                 description=str(e),
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
-class AddPanelModal(discord.ui.Modal, title="Panel hinzufügen"):
+class AddPanelModal(discord.ui.Modal, title="Add Panel"):
     def __init__(self, view):
         super().__init__()
         self.view = view
 
     name = discord.ui.TextInput(
         label="Name",
-        placeholder="Name des Panels",
+        placeholder="Panel name",
         required=True
     )
     description = discord.ui.TextInput(
-        label="Beschreibung",
-        placeholder="Beschreibung des Panels",
+        label="Description",
+        placeholder="Panel description",
         required=True,
         style=discord.TextStyle.paragraph
     )
     category_id = discord.ui.TextInput(
-        label="Kategorie-ID",
-        placeholder="ID der Kategorie für Tickets",
+        label="Category ID",
+        placeholder="ID of the category where tickets should be created",
         required=True
     )
 
@@ -711,10 +714,10 @@ class AddPanelModal(discord.ui.Modal, title="Panel hinzufügen"):
                 try:
                     category = await interaction.guild.fetch_channel(category_id)
                 except:
-                    raise ValueError("Kategorie mit dieser ID nicht gefunden")
+                    raise ValueError("Category with this ID not found")
             
             if category.type != discord.ChannelType.category:
-                raise ValueError("Der angegebene Kanal ist keine Kategorie")
+                raise ValueError("The specified channel is not a category")
 
             panel = {
                 'id': str(len(self.view.settings[self.view.guild_id]['tickets']['panels'])),
@@ -727,24 +730,24 @@ class AddPanelModal(discord.ui.Modal, title="Panel hinzufügen"):
             self.view.save_settings()
 
             embed = discord.Embed(
-                title="Panel erstellt",
-                description=f"Das Panel '{self.name.value}' wurde erstellt",
+                title="Panel Created",
+                description=f"The panel '{self.name.value}' has been created",
                 color=discord.Color.green()
             )
             embed.add_field(
-                name="Panel-ID",
+                name="Panel ID",
                 value=f"`{panel['id']}`",
                 inline=False
             )
             embed.add_field(
-                name="Kategorie",
+                name="Category",
                 value=f"{category.mention}",
                 inline=False
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
         except ValueError as e:
             embed = discord.Embed(
-                title="Fehler",
+                title="Error",
                 description=str(e),
                 color=discord.Color.red()
             )
@@ -752,22 +755,22 @@ class AddPanelModal(discord.ui.Modal, title="Panel hinzufügen"):
 
 class EditPanelModal(discord.ui.Modal):
     def __init__(self, view, panel):
-        super().__init__(title=f"Panel #{panel['id']} bearbeiten")
+        super().__init__(title=f"Panel #{panel['id']} edit")
         self.view = view
         self.panel = panel
         
         # Füge Text-Inputs mit den aktuellen Werten hinzu
         self.name = discord.ui.TextInput(
             label="Name",
-            placeholder="Name des Panels",
+            placeholder="Panel name",
             default=panel['name'],
             required=True
         )
         self.add_item(self.name)
         
         self.description = discord.ui.TextInput(
-            label="Beschreibung",
-            placeholder="Beschreibung des Panels",
+            label="Description",
+            placeholder="Panel description",
             default=panel['description'],
             required=True,
             style=discord.TextStyle.paragraph
@@ -775,8 +778,8 @@ class EditPanelModal(discord.ui.Modal):
         self.add_item(self.description)
         
         self.category_id = discord.ui.TextInput(
-            label="Kategorie-ID",
-            placeholder="ID der Kategorie für Tickets",
+            label="Category ID",
+            placeholder="ID of the category where tickets should be created",
             default=str(panel['category_id']),
             required=True
         )
@@ -790,10 +793,10 @@ class EditPanelModal(discord.ui.Modal):
                 try:
                     category = await interaction.guild.fetch_channel(category_id)
                 except:
-                    raise ValueError("Kategorie mit dieser ID nicht gefunden")
+                    raise ValueError("Category with this ID not found")
             
             if category.type != discord.ChannelType.category:
-                raise ValueError("Der angegebene Kanal ist keine Kategorie")
+                raise ValueError("The specified channel is not a category")
 
             # Aktualisiere das Panel
             self.panel['name'] = self.name.value
@@ -812,19 +815,19 @@ class EditPanelModal(discord.ui.Modal):
             self.view.save_settings()
 
             embed = discord.Embed(
-                title="Panel aktualisiert",
-                description=f"Das Panel **#{self.panel['id']} - {self.panel['name']}** wurde erfolgreich aktualisiert",
+                title="Panel Updated",
+                description=f"Panel **#{self.panel['id']} - {self.panel['name']}** has been updated successfully",
                 color=discord.Color.green()
             )
             embed.add_field(
-                name="Neue Werte",
-                value=f"**Name:** {self.panel['name']}\n**Beschreibung:** {self.panel['description']}\n**Kategorie:** {category.mention}",
+                name="New Values",
+                value=f"**Name:** {self.panel['name']}\n**Description:** {self.panel['description']}\n**Category:** {category.mention}",
                 inline=False
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
         except ValueError as e:
             embed = discord.Embed(
-                title="Fehler",
+                title="Error",
                 description=str(e),
                 color=discord.Color.red()
             )
@@ -836,7 +839,7 @@ class ConfirmDeleteView(discord.ui.View):
         self.setup_view = setup_view
         self.panel = panel
     
-    @discord.ui.button(label="Ja, löschen", style=discord.ButtonStyle.danger, custom_id="confirm_delete")
+    @discord.ui.button(label="Yes, delete", style=discord.ButtonStyle.danger, custom_id="confirm_delete")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         # Entferne das Panel aus der Liste
         self.setup_view.settings[self.setup_view.guild_id]['tickets']['panels'] = [
@@ -849,8 +852,8 @@ class ConfirmDeleteView(discord.ui.View):
         
         # Informiere den Benutzer
         embed = discord.Embed(
-            title="Panel gelöscht",
-            description=f"Das Panel **#{self.panel['id']} - {self.panel['name']}** wurde erfolgreich gelöscht",
+            title="Panel Deleted",
+            description=f"Panel **#{self.panel['id']} - {self.panel['name']}** has been deleted.",
             color=discord.Color.green()
         )
         
@@ -860,11 +863,11 @@ class ConfirmDeleteView(discord.ui.View):
         
         await interaction.response.edit_message(embed=embed, view=self)
     
-    @discord.ui.button(label="Abbrechen", style=discord.ButtonStyle.secondary, custom_id="cancel_delete")
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.secondary, custom_id="cancel_delete")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         embed = discord.Embed(
-            title="Vorgang abgebrochen",
-            description="Das Panel wurde nicht gelöscht",
+            title="Deletion Cancelled",
+            description="Panel deletion has been cancelled.",
             color=discord.Color.blue()
         )
         
@@ -993,7 +996,7 @@ class Tickets(commands.Cog):
         except Exception as e:
             print(f"Fehler beim Speichern des aktiven Panels: {e}")
 
-    @app_commands.command(name="ticketsetup", description="Öffnet das Setup-Menü für das Ticket-System")
+    @app_commands.command(name="ticketsetup", description="Opens the setup menu for the ticket system")
     @app_commands.checks.has_permissions(administrator=True)
     async def ticketsetup(self, interaction: discord.Interaction):
         lang = self.get_language(interaction.guild_id)
@@ -1008,7 +1011,7 @@ class Tickets(commands.Cog):
         view = TicketSetupView(self.bot, interaction.guild_id)
         await interaction.response.send_message(embed=embed, view=view)
 
-    @app_commands.command(name="ticketpanel", description="Erstellt ein Ticket-Panel in einem Kanal")
+    @app_commands.command(name="ticketpanel", description="Creates a ticket panel in a channel")
     @app_commands.checks.has_permissions(administrator=True)
     async def ticketpanel(self, interaction: discord.Interaction, panel_id: str, channel_id: str):
         lang = self.get_language(interaction.guild_id)
@@ -1049,7 +1052,7 @@ class Tickets(commands.Cog):
         if not panel:
             embed = discord.Embed(
                 title=language["general"]["error"],
-                description="Panel nicht gefunden",
+                description="Panel not found",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed)
@@ -1070,7 +1073,7 @@ class Tickets(commands.Cog):
                 else:
                     embed = discord.Embed(
                         title=language["general"]["error"],
-                        description=f"Die Kategorie '{category_name}' wurde nicht gefunden. Bitte erstelle das Panel neu.",
+                        description=f"The category '{category_name}' was not found. Please recreate the panel.",
                         color=discord.Color.red()
                     )
                     await interaction.response.send_message(embed=embed)
@@ -1078,7 +1081,7 @@ class Tickets(commands.Cog):
             else:
                 embed = discord.Embed(
                     title=language["general"]["error"],
-                    description="Das Panel hat keine gültige Kategorie. Bitte erstelle es neu.",
+                    description="The panel has no valid category. Please recreate it.",
                     color=discord.Color.red()
                 )
                 await interaction.response.send_message(embed=embed)
@@ -1092,7 +1095,7 @@ class Tickets(commands.Cog):
                 target_channel = await interaction.guild.fetch_channel(target_channel_id)
             
             if not isinstance(target_channel, discord.TextChannel):
-                raise ValueError("Der angegebene Kanal ist kein Textkanal")
+                raise ValueError("The specified channel is not a text channel")
         except Exception as e:
             embed = discord.Embed(
                 title=language["general"]["error"],
@@ -1135,10 +1138,10 @@ class Tickets(commands.Cog):
         embed.add_field(name="Persistenz", value="✅ Panel bleibt auch nach Neustart aktiv", inline=False)
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @app_commands.command(name="restorepanels", description="Stellt alle Ticket-Panels nach einem Neustart wieder her")
+    @app_commands.command(name="restorepanels", description="Restores all ticket panels after a restart")
     @app_commands.checks.has_permissions(administrator=True)
     async def restorepanels(self, interaction: discord.Interaction):
-        """Manuelles Wiederherstellen der Ticket-Panels"""
+        """Restores all ticket panels after a restart"""
         await interaction.response.defer()
         
         start_time = time.time()
@@ -1158,15 +1161,15 @@ class Tickets(commands.Cog):
         
         await interaction.followup.send(embed=embed)
 
-    @app_commands.command(name="add", description="Fügt einen Benutzer zum aktuellen Ticket hinzu")
+    @app_commands.command(name="add", description="Adds a user to the current ticket")
     async def add_user(self, interaction: discord.Interaction, user: discord.Member):
-        """Fügt einen Benutzer zum aktuellen Ticket hinzu"""
+        """Adds a user to the current ticket"""
         # Prüfen, ob wir in einem Ticket-Kanal sind
         channel = interaction.channel
         if not channel or not channel.name.startswith("ticket-"):
             embed = discord.Embed(
-                title="Fehler",
-                description="Dieser Befehl kann nur in einem Ticket-Kanal verwendet werden.",
+                title="Error",
+                description="This command can only be used in a ticket channel.",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -1177,7 +1180,7 @@ class Tickets(commands.Cog):
         if permissions.read_messages:
             embed = discord.Embed(
                 title="Information",
-                description=f"{user.mention} hat bereits Zugriff auf dieses Ticket.",
+                description=f"{user.mention} has already access to this ticket.",
                 color=discord.Color.blue()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -1189,31 +1192,31 @@ class Tickets(commands.Cog):
             
             # Erfolgs-Nachricht senden
             embed = discord.Embed(
-                title="Benutzer hinzugefügt",
-                description=f"{user.mention} wurde zum Ticket hinzugefügt.",
+                title="User Added",
+                description=f"{user.mention} has been added to the ticket.",
                 color=discord.Color.green()
             )
             await interaction.response.send_message(embed=embed)
             
             # Benachrichtigung im Ticket
-            await channel.send(f"{user.mention} wurde von {interaction.user.mention} zum Ticket hinzugefügt.")
+            await channel.send(f"{user.mention} has been added to the ticket by {interaction.user.mention}.")
         except Exception as e:
             embed = discord.Embed(
-                title="Fehler",
-                description=f"Fehler beim Hinzufügen des Benutzers: {str(e)}",
+                title="Error",
+                description=f"Error adding user: {str(e)}",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @app_commands.command(name="remove", description="Entfernt einen Benutzer aus dem aktuellen Ticket")
+    @app_commands.command(name="remove", description="Removes a user from the current ticket")
     async def remove_user(self, interaction: discord.Interaction, user: discord.Member):
-        """Entfernt einen Benutzer aus dem aktuellen Ticket"""
+        """Removes a user from the current ticket"""
         # Prüfen, ob wir in einem Ticket-Kanal sind
         channel = interaction.channel
         if not channel or not channel.name.startswith("ticket-"):
             embed = discord.Embed(
-                title="Fehler",
-                description="Dieser Befehl kann nur in einem Ticket-Kanal verwendet werden.",
+                title="Error",
+                description="This command can only be used in a ticket channel.",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -1224,8 +1227,8 @@ class Tickets(commands.Cog):
         try:
             async for message in channel.history(limit=1, oldest_first=True):
                 for embed in message.embeds:
-                    if "Ticket von" in embed.description:
-                        opener_mention = embed.description.split("Ticket von ")[1]
+                    if "Ticket from" in embed.description:
+                        opener_mention = embed.description.split("Ticket from ")[1]
                         if opener_mention:
                             for member in channel.guild.members:
                                 if member.mention == opener_mention and member.id == user.id:
@@ -1235,8 +1238,8 @@ class Tickets(commands.Cog):
             
             if ticket_opener:
                 embed = discord.Embed(
-                    title="Fehler",
-                    description=f"Der Ersteller des Tickets kann nicht entfernt werden.",
+                    title="Error",
+                    description="The creator of the ticket cannot be removed.",
                     color=discord.Color.red()
                 )
                 await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -1249,7 +1252,7 @@ class Tickets(commands.Cog):
         if not permissions.read_messages:
             embed = discord.Embed(
                 title="Information",
-                description=f"{user.mention} hat keinen Zugriff auf dieses Ticket.",
+                description=f"{user.mention} has no access to this ticket.",
                 color=discord.Color.blue()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -1261,31 +1264,31 @@ class Tickets(commands.Cog):
             
             # Erfolgs-Nachricht senden
             embed = discord.Embed(
-                title="Benutzer entfernt",
-                description=f"{user.mention} wurde aus dem Ticket entfernt.",
+                title="User Removed",
+                description=f"{user.mention} has been removed from the ticket.",
                 color=discord.Color.green()
             )
             await interaction.response.send_message(embed=embed)
             
             # Benachrichtigung im Ticket
-            await channel.send(f"{user.mention} wurde von {interaction.user.mention} aus dem Ticket entfernt.")
+            await channel.send(f"{user.mention} has been removed from the ticket by {interaction.user.mention}.")
         except Exception as e:
             embed = discord.Embed(
-                title="Fehler",
-                description=f"Fehler beim Entfernen des Benutzers: {str(e)}",
+                title="Error",
+                description=f"Error removing user: {str(e)}",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @app_commands.command(name="claim", description="Beansprucht das aktuelle Ticket")
+    @app_commands.command(name="claim", description="Claims the current ticket")
     async def claim_ticket(self, interaction: discord.Interaction):
-        """Beansprucht das aktuelle Ticket"""
+        """Claims the current ticket"""
         # Prüfen, ob wir in einem Ticket-Kanal sind
         channel = interaction.channel
         if not channel or not channel.name.startswith("ticket-"):
             embed = discord.Embed(
-                title="Fehler",
-                description="Dieser Befehl kann nur in einem Ticket-Kanal verwendet werden.",
+                title="Error",
+                description="This command can only be used in a ticket channel.",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -1307,8 +1310,8 @@ class Tickets(commands.Cog):
         
         if not has_support_role and not interaction.user.guild_permissions.administrator:
             embed = discord.Embed(
-                title="Fehler",
-                description="Du hast keine Berechtigung, dieses Ticket zu beanspruchen.",
+                title="Error",
+                description="You do not have permission to claim this ticket.",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -1318,27 +1321,27 @@ class Tickets(commands.Cog):
         try:
             # Suche nach dem ersten Embed im Kanal und aktualisiere es
             async for message in channel.history(limit=10, oldest_first=True):
-                if message.embeds and "Ticket von" in message.embeds[0].description:
+                if message.embeds and "Ticket from" in message.embeds[0].description:
                     embed = message.embeds[0]
                     
                     # Prüfe, ob das Ticket bereits beansprucht wurde
                     claimed_field = None
                     for i, field in enumerate(embed.fields):
-                        if field.name == "Beansprucht von":
+                        if field.name == "Claimed by":
                             claimed_field = i
                             break
                     
                     if claimed_field is not None:
-                        embed.set_field_at(claimed_field, name="Beansprucht von", value=interaction.user.mention, inline=False)
+                        embed.set_field_at(claimed_field, name="Claimed by", value=interaction.user.mention, inline=False)
                     else:
-                        embed.add_field(name="Beansprucht von", value=interaction.user.mention, inline=False)
+                        embed.add_field(name="Claimed by", value=interaction.user.mention, inline=False)
                     
                     await message.edit(embed=embed)
                     
                     # Erfolgs-Nachricht senden
                     embed_success = discord.Embed(
-                        title="Ticket beansprucht",
-                        description=f"{interaction.user.mention} hat dieses Ticket beansprucht.",
+                        title="Ticket Claimed",
+                        description=f"{interaction.user.mention} has claimed this ticket.",
                         color=discord.Color.green()
                     )
                     await interaction.response.send_message(embed=embed_success)
@@ -1346,28 +1349,28 @@ class Tickets(commands.Cog):
             
             # Wenn kein Embed gefunden wurde
             embed = discord.Embed(
-                title="Fehler",
-                description="Das Ticket-Embed konnte nicht gefunden werden.",
+                title="Error",
+                description="The ticket embed could not be found.",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
         except Exception as e:
             embed = discord.Embed(
-                title="Fehler",
-                description=f"Fehler beim Beanspruchen des Tickets: {str(e)}",
+                title="Error",
+                description=f"Error claiming ticket: {str(e)}",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @app_commands.command(name="close", description="Schließt das aktuelle Ticket")
+    @app_commands.command(name="close", description="Closes the current ticket")
     async def close_ticket_cmd(self, interaction: discord.Interaction):
-        """Schließt das aktuelle Ticket sofort"""
+        """Closes the current ticket"""
         # Prüfen, ob wir in einem Ticket-Kanal sind
         channel = interaction.channel
         if not channel or not channel.name.startswith("ticket-"):
             embed = discord.Embed(
-                title="Fehler",
-                description="Dieser Befehl kann nur in einem Ticket-Kanal verwendet werden.",
+                title="Error",
+                description="This command can only be used in a ticket channel.",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -1377,7 +1380,7 @@ class Tickets(commands.Cog):
         await interaction.response.defer()
         
         # Benachrichtigung im Ticket
-        await channel.send(f"Ticket wird von {interaction.user.mention} geschlossen...")
+        await channel.send(f"Ticket is being closed by {interaction.user.mention}...")
         
         # Die gleiche Close-Funktion aufrufen, die auch der Button verwendet
         ticket_view = None
@@ -1409,18 +1412,18 @@ class Tickets(commands.Cog):
                 if len(ticket_parts) >= 3:
                     ticket_id_match = ticket_parts[-1]
             except:
-                ticket_id_match = "Unbekannt"
+                ticket_id_match = "Unknown"
 
             # Finde den Ticket-Ersteller
             ticket_opener = None
             ticket_opened_at = None
             async for message in channel.history(limit=1, oldest_first=True):
                 for embed in message.embeds:
-                    if "Ticket von" in embed.description:
+                    if "Ticket from" in embed.description:
                         for field in embed.fields:
-                            if field.name == "Erstellt am":
+                            if field.name == "Created at":
                                 ticket_opened_at = field.value
-                        opener_mention = embed.description.split("Ticket von ")[1]
+                        opener_mention = embed.description.split("Ticket from ")[1]
                         if opener_mention:
                             for member in channel.guild.members:
                                 if member.mention == opener_mention:
@@ -1433,7 +1436,7 @@ class Tickets(commands.Cog):
             async for message in channel.history(limit=10, oldest_first=True):
                 for embed in message.embeds:
                     for field in embed.fields:
-                        if field.name == "Beansprucht von":
+                        if field.name == "Claimed by":
                             ticket_claimed_by = field.value
                             break
                     if ticket_claimed_by != "Not claimed":
@@ -1442,19 +1445,19 @@ class Tickets(commands.Cog):
                     break
             
             # Benutzer informieren
-            await channel.send("Ticket wird geschlossen und Transcript wird erstellt...")
+            await channel.send("Ticket is being closed and transcript is being created...")
 
             # Erstelle Transcript
             transcript = []
             try:
                 async for message in channel.history(limit=None, oldest_first=True):
-                    content = message.content or "*Keine Textnachricht*"
-                    attachments = ", ".join([f"[Anhang: {a.filename}]" for a in message.attachments])
+                    content = message.content or "*No text message*"
+                    attachments = ", ".join([f"[Attachment: {a.filename}]" for a in message.attachments])
                     if attachments:
                         content += f" {attachments}"
                     transcript.append(f"[{message.created_at.strftime('%Y-%m-%d %H:%M:%S')}] {message.author}: {content}")
             except Exception as e:
-                transcript.append(f"Fehler beim Erstellen des Transcripts: {e}")
+                transcript.append(f"Error creating transcript: {e}")
 
             # Sende Transcript zum konfigurierten Kanal
             try:
@@ -1484,14 +1487,14 @@ class Tickets(commands.Cog):
                         # Ticket ID
                         embed.add_field(
                             name="🎫 Ticket ID",
-                            value=ticket_id_match or "Unbekannt",
+                            value=ticket_id_match or "Unknown",
                             inline=True
                         )
                         
                         # Opened By
                         embed.add_field(
                             name="✅ Opened By",
-                            value=ticket_opener.mention if ticket_opener else "Unbekannt",
+                            value=ticket_opener.mention if ticket_opener else "Unknown",
                             inline=True
                         )
                         
@@ -1519,7 +1522,7 @@ class Tickets(commands.Cog):
                         # Reason
                         embed.add_field(
                             name="📝 Reason",
-                            value="Geschlossen durch /close Befehl",
+                            value="Closed by /close command",
                             inline=False
                         )
                         
@@ -1536,22 +1539,22 @@ class Tickets(commands.Cog):
                         view = TranscriptView(transcript_file.filename)
                         await transcript_message.edit(view=view)
             except Exception as e:
-                print(f"Fehler beim Senden des Transcripts: {e}")
+                print(f"Error sending transcript: {e}")
 
             # Ticket-Kanal nach kurzer Verzögerung löschen
             await asyncio.sleep(3)
             try:
                 await channel.delete()
             except Exception as e:
-                print(f"Fehler beim Löschen des Ticket-Kanals: {e}")
+                print(f"Error deleting ticket channel: {e}")
 
-    @app_commands.command(name="close_request", description="Schließt das Ticket nach einer Verzögerung")
+    @app_commands.command(name="close_request", description="Closes the ticket after a delay")
     @app_commands.describe(
-        close_delay="Zeit in Minuten, nach der das Ticket geschlossen wird (1-60)",
-        reason="Grund für die Schließung des Tickets"
+        close_delay="Time in minutes after which the ticket will be closed (1-60)",
+        reason="Reason for closing the ticket"
     )
     async def close_ticket_request(self, interaction: discord.Interaction, close_delay: int = 5, reason: str = None):
-        """Schließt das Ticket nach einer bestimmten Verzögerung"""
+        """Closes the ticket after a delay"""
         # Begrenze die Verzögerung auf maximal 60 Minuten
         if close_delay < 1:
             close_delay = 1
@@ -1562,8 +1565,8 @@ class Tickets(commands.Cog):
         channel = interaction.channel
         if not channel or not channel.name.startswith("ticket-"):
             embed = discord.Embed(
-                title="Fehler",
-                description="Dieser Befehl kann nur in einem Ticket-Kanal verwendet werden.",
+                title="Error",
+                description="This command can only be used in a ticket channel.",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -1571,13 +1574,13 @@ class Tickets(commands.Cog):
             
         # Bestätigungsnachricht senden
         embed = discord.Embed(
-            title="Ticket wird geschlossen",
-            description=f"Dieses Ticket wird in {close_delay} Minuten geschlossen.",
+            title="Ticket will be closed",
+            description=f"This ticket will be closed in {close_delay} minutes.",
             color=discord.Color.orange()
         )
         if reason:
-            embed.add_field(name="Grund", value=reason, inline=False)
-        embed.add_field(name="Geschlossen von", value=interaction.user.mention, inline=False)
+            embed.add_field(name="Reason", value=reason, inline=False)
+        embed.add_field(name="Closed by", value=interaction.user.mention, inline=False)
         
         # Erstelle eine View mit einem Button zum Abbrechen
         view = CancelCloseView(interaction.user.id, close_delay * 60, reason)
@@ -1599,7 +1602,7 @@ class Tickets(commands.Cog):
                 return
                 
             # Ticket schließen
-            await channel.send(f"Zeit abgelaufen. Ticket wird geschlossen...")
+            await channel.send(f"Time's up. Ticket is being closed...")
             
             # Die gleiche Logik wie beim /close Befehl
             ticket_view = None
@@ -1629,18 +1632,18 @@ class Tickets(commands.Cog):
                     if len(ticket_parts) >= 3:
                         ticket_id_match = ticket_parts[-1]
                 except:
-                    ticket_id_match = "Unbekannt"
+                    ticket_id_match = "Unknown"
 
                 # Finde den Ticket-Ersteller
                 ticket_opener = None
                 ticket_opened_at = None
                 async for message in channel.history(limit=1, oldest_first=True):
                     for embed in message.embeds:
-                        if "Ticket von" in embed.description:
+                        if "Ticket from" in embed.description:
                             for field in embed.fields:
-                                if field.name == "Erstellt am":
+                                if field.name == "Created at":
                                     ticket_opened_at = field.value
-                            opener_mention = embed.description.split("Ticket von ")[1]
+                            opener_mention = embed.description.split("Ticket from ")[1]
                             if opener_mention:
                                 for member in channel.guild.members:
                                     if member.mention == opener_mention:
@@ -1653,7 +1656,7 @@ class Tickets(commands.Cog):
                 async for message in channel.history(limit=10, oldest_first=True):
                     for embed in message.embeds:
                         for field in embed.fields:
-                            if field.name == "Beansprucht von":
+                            if field.name == "Claimed by":
                                 ticket_claimed_by = field.value
                                 break
                         if ticket_claimed_by != "Not claimed":
@@ -1662,19 +1665,19 @@ class Tickets(commands.Cog):
                         break
                 
                 # Benutzer informieren
-                await channel.send("Ticket wird geschlossen und Transcript wird erstellt...")
+                await channel.send("Ticket is being closed and transcript is being created...")
 
                 # Erstelle Transcript
                 transcript = []
                 try:
                     async for message in channel.history(limit=None, oldest_first=True):
-                        content = message.content or "*Keine Textnachricht*"
-                        attachments = ", ".join([f"[Anhang: {a.filename}]" for a in message.attachments])
+                        content = message.content or "*No text message*"
+                        attachments = ", ".join([f"[Attachment: {a.filename}]" for a in message.attachments])
                         if attachments:
                             content += f" {attachments}"
                         transcript.append(f"[{message.created_at.strftime('%Y-%m-%d %H:%M:%S')}] {message.author}: {content}")
                 except Exception as e:
-                    transcript.append(f"Fehler beim Erstellen des Transcripts: {e}")
+                    transcript.append(f"Error creating transcript: {e}")
 
                 # Sende Transcript zum konfigurierten Kanal
                 try:
@@ -1704,14 +1707,14 @@ class Tickets(commands.Cog):
                             # Ticket ID
                             embed.add_field(
                                 name="🎫 Ticket ID",
-                                value=ticket_id_match or "Unbekannt",
+                                value=ticket_id_match or "Unknown",
                                 inline=True
                             )
                             
                             # Opened By
                             embed.add_field(
                                 name="✅ Opened By",
-                                value=ticket_opener.mention if ticket_opener else "Unbekannt",
+                                value=ticket_opener.mention if ticket_opener else "Unknown",
                                 inline=True
                             )
                             
@@ -1739,7 +1742,7 @@ class Tickets(commands.Cog):
                             # Reason
                             embed.add_field(
                                 name="📝 Reason",
-                                value=reason or "Verzögerte Schließung (keine Angabe)",
+                                value=reason or "Delayed closure (no reason given)",
                                 inline=False
                             )
                             
@@ -1756,16 +1759,16 @@ class Tickets(commands.Cog):
                             view = TranscriptView(transcript_file.filename)
                             await transcript_message.edit(view=view)
                 except Exception as e:
-                    print(f"Fehler beim Senden des Transcripts: {e}")
+                    print(f"Error sending transcript: {e}")
 
                 # Ticket-Kanal nach kurzer Verzögerung löschen
                 await asyncio.sleep(3)
                 try:
                     await channel.delete()
                 except Exception as e:
-                    print(f"Fehler beim Löschen des Ticket-Kanals: {e}")
+                    print(f"Error deleting ticket channel: {e}")
         except Exception as e:
-            print(f"Fehler beim verzögerten Schließen des Tickets: {e}")
+            print(f"Error closing ticket after delay: {e}")
 
     @ticketsetup.error
     async def ticketsetup_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):

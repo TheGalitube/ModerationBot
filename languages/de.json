@@ -16,6 +16,175 @@
             "no_permission": "Du hast keine Berechtigung, Benutzer stummzuschalten"
         }
     },
+    "warnings": {
+        "warn": {
+            "success": "Warnung ausgesprochen",
+            "user_warned": "wurde verwarnt",
+            "reason": "Grund",
+            "moderator": "Moderator",
+            "warning_number": "Warnung #",
+            "total_warnings": "Anzahl Warnungen",
+            "user_notification": "Du wurdest auf {guild} verwarnt",
+            "warning_reason": "Grund: {reason}",
+            "total_count": "Gesamtanzahl",
+            "log_title": "Warnung ausgesprochen",
+            "user": "Benutzer",
+            "automatic_punishment": "Automatische Strafe nach {count} Warnungen",
+            "muted_for": "wurde für {duration} Stunden stummgeschaltet",
+            "kicked": "wurde gekickt",
+            "could_not_mute": "Konnte den Benutzer nicht stumm schalten",
+            "could_not_kick": "Konnte den Benutzer nicht kicken"
+        },
+        "warnings": {
+            "no_warnings": "Keine Warnungen",
+            "no_warnings_user": "hat keine Warnungen",
+            "user_warnings": "Warnungen von {user}",
+            "warning_info": "Warnung #{id}",
+            "warning_details": "Grund: {reason}\nModerator: {moderator}\nDatum: {date}",
+            "unknown_moderator": "Unbekannt"
+        },
+        "delwarn": {
+            "error": "Fehler",
+            "no_warnings_user": "hat keine Warnungen",
+            "warning_not_found": "Warnung #{id} wurde nicht gefunden",
+            "warning_deleted": "Warnung gelöscht",
+            "warning_removed": "Warnung #{id} von {user} wurde gelöscht",
+            "log_title": "Warnung gelöscht"
+        },
+        "clearwarnings": {
+            "no_warnings": "Keine Warnungen",
+            "no_warnings_to_clear": "hat keine Warnungen zum Löschen",
+            "warnings_cleared": "Warnungen gelöscht",
+            "all_warnings_cleared": "Alle Warnungen von {user} wurden gelöscht",
+            "log_title": "Alle Warnungen gelöscht"
+        },
+        "settings": {
+            "title": "Warnungseinstellungen aktualisiert",
+            "max_warnings": "Maximale Warnungen",
+            "log_channel": "Log-Kanal",
+            "none": "Keiner",
+            "user_notification": "Benutzerbenachrichtigung",
+            "enabled": "Aktiviert",
+            "disabled": "Deaktiviert"
+        },
+        "punishment": {
+            "title": "Warnungsstrafe gesetzt",
+            "warning_count": "Anzahl Warnungen",
+            "punishment_type": "Strafe",
+            "duration": "Dauer",
+            "duration_hours": "{duration} Stunden",
+            "mute_duration_required": "Bei einer Mute-Strafe muss eine Dauer angegeben werden"
+        }
+    },
+    "roles": {
+        "autorole": {
+            "set": "Autorole gesetzt",
+            "new_members_get": "Neue Mitglieder erhalten automatisch die Rolle {role}",
+            "removed": "Autorole entfernt",
+            "no_autorole": "Neue Mitglieder erhalten keine automatische Rolle mehr",
+            "not_set": "Keine Autorole gesetzt",
+            "no_autorole_configured": "Es ist keine automatische Rolle konfiguriert"
+        },
+        "selfrole": {
+            "error": "Fehler",
+            "no_roles": "Du musst mindestens eine Rolle angeben",
+            "panel_created": "Self-Role Panel erstellt",
+            "panel_created_success": "Das Panel wurde erfolgreich in {channel} erstellt"
+        },
+        "roleinfo": {
+            "title": "Rolleninformationen: {role}",
+            "id": "ID",
+            "color": "Farbe",
+            "position": "Position",
+            "mentionable": "Erwähnbar",
+            "hoist": "Anzeigbar",
+            "managed": "Verwaltet von Integration",
+            "members": "Mitglieder",
+            "permissions": "Berechtigungen",
+            "created_at": "Erstellt am"
+        },
+        "rolemembers": {
+            "title": "Mitglieder der Rolle {role}",
+            "no_members": "Diese Rolle hat keine Mitglieder",
+            "member_count": "Anzahl: {count}",
+            "members_list": "Mitglieder",
+            "and_more": "... und {count} weitere"
+        },
+        "addrole": {
+            "error": "Fehler",
+            "already_has_role": "hat bereits die Rolle {role}",
+            "role_added": "Rolle hinzugefügt",
+            "role_added_to_user": "Die Rolle {role} wurde {user} hinzugefügt",
+            "no_permission_grant": "Ich habe keine Berechtigung, diese Rolle zu vergeben",
+            "error_occurred": "Ein Fehler ist aufgetreten: {error}"
+        },
+        "removerole": {
+            "error": "Fehler",
+            "doesnt_have_role": "hat nicht die Rolle {role}",
+            "role_removed": "Rolle entfernt",
+            "role_removed_from_user": "Die Rolle {role} wurde von {user} entfernt",
+            "no_permission_remove": "Ich habe keine Berechtigung, diese Rolle zu entfernen",
+            "error_occurred": "Ein Fehler ist aufgetreten: {error}"
+        },
+        "rolesettings": {
+            "title": "Rolleneinstellungen",
+            "autorole": "Autorole",
+            "role_not_found": "Rolle nicht gefunden",
+            "not_set": "Nicht gesetzt",
+            "selfrole_panels": "Self-Role Panels"
+        },
+        "button": {
+            "role_removed": "❌ Die Rolle {role} wurde entfernt",
+            "role_added": "✅ Die Rolle {role} wurde hinzugefügt"
+        }
+    },
+    "polls": {
+        "create_poll": {
+            "title": "Umfrage erstellen",
+            "question": "Frage",
+            "question_placeholder": "Geben Sie Ihre Frage ein",
+            "options": "Optionen",
+            "options_placeholder": "Option 1, Option 2, Option 3...",
+            "duration": "Dauer",
+            "duration_placeholder": "z.B. 1h, 30m, 2d",
+            "description": "Beschreibung (optional)",
+            "description_placeholder": "Zusätzliche Beschreibung der Umfrage",
+            "poll_created": "Umfrage erstellt",
+            "poll_created_by": "Erstellt von {user}",
+            "ends_at": "Endet um {time}",
+            "vote_with_reactions": "Stimme mit den Reaktionen ab",
+            "invalid_duration": "Ungültiges Zeitformat. Verwende z.B. 1h, 30m, 2d",
+            "min_options": "Mindestens 2 Optionen erforderlich",
+            "max_options": "Maximal 10 Optionen erlaubt"
+        },
+        "quick_poll": {
+            "title": "Schnellumfrage erstellen",
+            "question": "Frage",
+            "question_placeholder": "Geben Sie Ihre Ja/Nein-Frage ein",
+            "duration": "Dauer",
+            "duration_placeholder": "z.B. 1h, 30m, 2d",
+            "poll_created": "Schnellumfrage erstellt",
+            "poll_created_by": "Erstellt von {user}",
+            "ends_at": "Endet um {time}",
+            "vote_with_reactions": "Stimme mit den Reaktionen ab",
+            "invalid_duration": "Ungültiges Zeitformat. Verwende z.B. 1h, 30m, 2d"
+        },
+        "poll_results": {
+            "title": "Umfrageergebnisse",
+            "question": "Frage",
+            "total_votes": "Gesamtstimmen: {count}",
+            "option_votes": "{option}: {votes} Stimmen ({percentage}%)",
+            "time_remaining": "Verbleibende Zeit: {time}",
+            "poll_ended": "Umfrage beendet",
+            "final_results": "Endergebnisse",
+            "no_votes": "Keine Stimmen abgegeben",
+            "poll_not_found": "Umfrage nicht gefunden"
+        },
+        "reactions": {
+            "duplicate_reaction": "Du hast bereits für diese Option gestimmt",
+            "reaction_removed": "Deine Stimme wurde entfernt"
+        }
+    },
     "settings": {
         "language": {
             "changed": "Sprache wurde auf Deutsch geändert",
@@ -124,14 +293,20 @@
             "moderation": "Moderation",
             "tickets": "Tickets",
             "utility": "Utility",
-            "admin": "Admin"
+            "admin": "Admin",
+            "warnings": "Warnungen",
+            "roles": "Rollen",
+            "polls": "Umfragen"
         },
         "buttons": {
             "main_menu": "Hauptmenü",
             "moderation": "Moderation",
             "tickets": "Tickets",
             "utility": "Utility",
-            "admin": "Admin"
+            "admin": "Admin",
+            "warnings": "Warnungen",
+            "roles": "Rollen",
+            "polls": "Umfragen"
         }
     },
     "general": {

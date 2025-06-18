@@ -27,7 +27,7 @@ class Utility(commands.Cog):
                 return settings.get(str(guild_id), {}).get('language', 'de')
         return 'de'
 
-    @app_commands.command(name="serverinfo", description="Zeigt Informationen über den Server")
+    @app_commands.command(name="serverinfo", description="Show server information")
     async def serverinfo(self, interaction: discord.Interaction):
         lang = self.get_language(interaction.guild_id)
         language = self.de if lang == "de" else self.en
@@ -109,7 +109,7 @@ class Utility(commands.Cog):
         
         await interaction.response.send_message(embed=embed)
 
-    @app_commands.command(name="userinfo", description="Zeigt Informationen über einen Benutzer")
+    @app_commands.command(name="userinfo", description="Show user information")
     async def userinfo(self, interaction: discord.Interaction, user: discord.Member = None):
         lang = self.get_language(interaction.guild_id)
         language = self.de if lang == "de" else self.en
@@ -118,7 +118,7 @@ class Utility(commands.Cog):
             user = interaction.user
 
         embed = discord.Embed(
-            title=f"Benutzer Information - {user.name}",
+            title=f"User Information - {user.name}",
             color=user.color
         )
         
@@ -165,7 +165,7 @@ class Utility(commands.Cog):
         
         await interaction.response.send_message(embed=embed)
 
-    @app_commands.command(name="botinfo", description="Zeigt Informationen über den Bot")
+    @app_commands.command(name="botinfo", description="Show bot information")
     async def botinfo(self, interaction: discord.Interaction):
         lang = self.get_language(interaction.guild_id)
         language = self.de if lang == "de" else self.en
@@ -202,12 +202,11 @@ class Utility(commands.Cog):
             inline=True
         )
         
-        # Performance
+        # Uptime
         uptime = time.time() - self.start_time
         hours = int(uptime // 3600)
         minutes = int((uptime % 3600) // 60)
         seconds = int(uptime % 60)
-        
         embed.add_field(
             name="Uptime",
             value=f"{hours}h {minutes}m {seconds}s",
@@ -215,56 +214,64 @@ class Utility(commands.Cog):
         )
         
         # Server und Benutzer
-        total_users = sum(guild.member_count for guild in self.bot.guilds)
         embed.add_field(
-            name="Server & Benutzer",
-            value=f"Server: {len(self.bot.guilds)}\n"
-                  f"Benutzer: {total_users}",
+            name="Server",
+            value=len(self.bot.guilds),
+            inline=True
+        )
+        embed.add_field(
+            name="Benutzer",
+            value=len(self.bot.users),
             inline=True
         )
         
-        # CPU und RAM
+        # System Ressourcen
         cpu_percent = psutil.cpu_percent()
         memory = psutil.virtual_memory()
-        
         embed.add_field(
-            name="System Ressourcen",
-            value=f"CPU: {cpu_percent}%\n"
-                  f"RAM: {memory.percent}%",
+            name="CPU",
+            value=f"{cpu_percent}%",
+            inline=True
+        )
+        embed.add_field(
+            name="RAM",
+            value=f"{memory.percent}%",
             inline=True
         )
         
         await interaction.response.send_message(embed=embed)
 
-    @app_commands.command(name="ping", description="Zeigt die Latenz des Bots")
+    @app_commands.command(name="ping", description="Show bot latency")
     async def ping(self, interaction: discord.Interaction):
         lang = self.get_language(interaction.guild_id)
         language = self.de if lang == "de" else self.en
 
-        # Bot Latenz
-        bot_latency = round(self.bot.latency * 1000)
-        
-        # API Latenz
-        start_time = time.perf_counter()
-        await interaction.response.defer()
-        api_latency = round((time.perf_counter() - start_time) * 1000)
-        
         embed = discord.Embed(
             title="🏓 Pong!",
             color=discord.Color.green()
         )
+        
+        # Bot Latenz
+        bot_latency = round(self.bot.latency * 1000)
         embed.add_field(
             name="Bot Latenz",
             value=f"{bot_latency}ms",
             inline=True
         )
+        
+        # API Latenz
+        start_time = time.time()
+        await interaction.response.send_message(embed=embed)
+        end_time = time.time()
+        api_latency = round((end_time - start_time) * 1000)
+        
         embed.add_field(
             name="API Latenz",
             value=f"{api_latency}ms",
             inline=True
         )
         
-        await interaction.followup.send(embed=embed)
+        await interaction.edit_original_response(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Utility(bot)) 

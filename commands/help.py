@@ -18,9 +18,21 @@ class HelpView(discord.ui.View):
                 "emoji": "🛡️",
                 "commands": ["kick", "ban", "mute"]
             },
+            "warnings": {
+                "emoji": "⚠️",
+                "commands": ["warn", "warnings", "delwarn", "clearwarnings", "warnsettings", "warnpunishment"]
+            },
+            "roles": {
+                "emoji": "🎭",
+                "commands": ["autorole", "selfrole", "roleinfo", "rolemembers", "addrole", "removerole", "rolesettings"]
+            },
+            "polls": {
+                "emoji": "📊",
+                "commands": ["poll", "quickpoll", "pollresults"]
+            },
             "tickets": {
                 "emoji": "🎫",
-                "commands": ["ticketsetup", "ticketpanel"]
+                "commands": ["ticketsetup", "ticketpanel", "restorepanels", "add", "remove", "claim", "close", "close_request"]
             },
             "utility": {
                 "emoji": "🔧",
@@ -53,10 +65,34 @@ class HelpView(discord.ui.View):
         ))
         
         self.add_item(discord.ui.Button(
+            label=self.language["help"]["buttons"]["warnings"],
+            style=discord.ButtonStyle.secondary,
+            emoji="⚠️",
+            row=2,
+            custom_id="warnings"
+        ))
+        
+        self.add_item(discord.ui.Button(
+            label=self.language["help"]["buttons"]["roles"],
+            style=discord.ButtonStyle.secondary,
+            emoji="🎭",
+            row=2,
+            custom_id="roles"
+        ))
+        
+        self.add_item(discord.ui.Button(
+            label=self.language["help"]["buttons"]["polls"],
+            style=discord.ButtonStyle.secondary,
+            emoji="📊",
+            row=3,
+            custom_id="polls"
+        ))
+        
+        self.add_item(discord.ui.Button(
             label=self.language["help"]["buttons"]["tickets"],
             style=discord.ButtonStyle.secondary,
             emoji="🎫",
-            row=2,
+            row=3,
             custom_id="tickets"
         ))
         
@@ -64,7 +100,7 @@ class HelpView(discord.ui.View):
             label=self.language["help"]["buttons"]["utility"],
             style=discord.ButtonStyle.secondary,
             emoji="🔧",
-            row=3,
+            row=4,
             custom_id="utility"
         ))
         
@@ -72,7 +108,7 @@ class HelpView(discord.ui.View):
             label=self.language["help"]["buttons"]["admin"],
             style=discord.ButtonStyle.secondary,
             emoji="⚙️",
-            row=3,
+            row=4,
             custom_id="admin"
         ))
         
@@ -194,8 +230,9 @@ class Help(commands.Cog):
                 return settings.get(str(guild_id), {}).get('language', 'de')
         return 'de'
 
-    @app_commands.command(name="help", description="Zeigt das Hilfe-Menü an")
-    async def help(self, interaction: discord.Interaction):
+    @app_commands.command(name="help", description="Shows the help menu")
+    async def help(self, interaction: discord.Interaction, category: str = None):
+        """Shows the help menu"""
         lang = self.get_language(interaction.guild_id)
         language = self.de if lang == "de" else self.en
 

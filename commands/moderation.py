@@ -16,12 +16,16 @@ class Moderation(commands.Cog):
             self.en = json.load(f)
 
     def get_language(self, guild_id):
-        # Hier später: Lade die Spracheinstellung für den Server
-        return "de"
+        if os.path.exists('guild_settings.json'):
+            with open('guild_settings.json', 'r') as f:
+                settings = json.load(f)
+                return settings.get(str(guild_id), {}).get('language', 'de')
+        return 'de'
 
-    @app_commands.command(name="kick", description="Kickt einen Benutzer vom Server")
+    @app_commands.command(name="kick", description="Kicks a user from the server")
     @app_commands.checks.has_permissions(kick_members=True)
     async def kick(self, interaction: discord.Interaction, user: discord.Member, reason: str = None):
+        """Kicks a user from the server"""
         lang = self.get_language(interaction.guild_id)
         language = self.de if lang == "de" else self.en
 
