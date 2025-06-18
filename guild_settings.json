@@ -1,0 +1,39 @@
+{
+    "1070719324358201374": {
+        "language": "de",
+        "tickets": {
+            "enabled": false,
+            "transcript_channel": 1070721140017877044,
+            "support_roles": [
+                1070719324358201378
+            ],
+            "panels": [
+                {
+                    "id": "0",
+                    "name": "Support",
+                    "description": "Hier kannst du ein Ticket erstellen",
+                    "category_id": 1070720892272914512
+                }
+            ]
+        },
+        "logging": {
+            "enabled": false,
+            "channel": 1070721140017877044,
+            "events": {
+                "member_join": true,
+                "member_leave": true,
+                "message_delete": true,
+                "message_edit": true,
+                "member_ban": true,
+                "member_unban": true,
+                "member_kick": true
+            }
+        },
+        "automod": {
+            "enabled": false,
+            "banned_words": [],
+            "max_mentions": 3,
+            "max_caps": 70
+        }
+    }
+}

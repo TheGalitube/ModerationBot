@@ -1,0 +1,64 @@
+import discord
+from discord import app_commands
+from discord.ext import commands
+import json
+import os
+
+class Moderation(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        self.load_languages()
+
+    def load_languages(self):
+        with open('languages/de.json', 'r', encoding='utf-8') as f:
+            self.de = json.load(f)
+        with open('languages/en.json', 'r', encoding='utf-8') as f:
+            self.en = json.load(f)
+
+    def get_language(self, guild_id):
+        # Hier später: Lade die Spracheinstellung für den Server
+        return "de"
+
+    @app_commands.command(name="kick", description="Kickt einen Benutzer vom Server")
+    @app_commands.checks.has_permissions(kick_members=True)
+    async def kick(self, interaction: discord.Interaction, user: discord.Member, reason: str = None):
+        lang = self.get_language(interaction.guild_id)
+        language = self.de if lang == "de" else self.en
+
+        try:
+            await user.kick(reason=reason)
+            embed = discord.Embed(
+                title=language["moderation"]["kick"]["success"],
+                description=f"Benutzer: {user.mention}\nGrund: {reason or 'Kein Grund angegeben'}",
+                color=discord.Color.green()
+            )
+            await interaction.response.send_message(embed=embed)
+        except Exception as e:
+            embed = discord.Embed(
+                title=language["moderation"]["kick"]["error"],
+                description=str(e),
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed)
+
+    @kick.error
+    async def kick_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        lang = self.get_language(interaction.guild_id)
+        language = self.de if lang == "de" else self.en
+        
+        if isinstance(error, app_commands.MissingPermissions):
+            embed = discord.Embed(
+                title=language["moderation"]["kick"]["no_permission"],
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed)
+        else:
+            embed = discord.Embed(
+                title=language["general"]["error"],
+                description=str(error),
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed)
+
+async def setup(bot):
+    await bot.add_cog(Moderation(bot)) 

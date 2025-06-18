@@ -1,0 +1,142 @@
+{
+    "moderation": {
+        "kick": {
+            "success": "User has been kicked",
+            "error": "Error kicking the user",
+            "no_permission": "You don't have permission to kick users"
+        },
+        "ban": {
+            "success": "User has been banned",
+            "error": "Error banning the user",
+            "no_permission": "You don't have permission to ban users"
+        },
+        "mute": {
+            "success": "User has been muted",
+            "error": "Error muting the user",
+            "no_permission": "You don't have permission to mute users"
+        }
+    },
+    "settings": {
+        "language": {
+            "changed": "Language has been changed to English",
+            "current": "Current language: English"
+        },
+        "setup": {
+            "title": "Bot Setup",
+            "description": "Configure the bot settings",
+            "automod": {
+                "title": "AutoMod Settings",
+                "description": "Configure automatic moderation",
+                "status": "Status",
+                "enabled": "Enabled",
+                "disabled": "Disabled",
+                "max_mentions": "Maximum Mentions",
+                "max_caps": "Maximum Caps Percentage",
+                "banned_words": "Banned Words",
+                "none": "None",
+                "add_word": "Add Word",
+                "word_added": "Word Added",
+                "word_placeholder": "Enter the word to ban"
+            },
+            "logging": {
+                "title": "Logging Settings",
+                "description": "Configure the logging system",
+                "status": "Status",
+                "enabled": "Enabled",
+                "disabled": "Disabled",
+                "channel": "Log Channel",
+                "not_found": "Not Found",
+                "events": "Logged Events",
+                "select_channel": "Select a channel for logs:",
+                "channel_set": "Log Channel Set"
+            },
+            "tickets": {
+                "title": "Ticket System Settings",
+                "description": "Configure the ticket system",
+                "status": "Status",
+                "enabled": "Enabled",
+                "disabled": "Disabled",
+                "transcript_channel": "Transcript Channel",
+                "support_roles": "Support Roles",
+                "panels": "Ticket Panels",
+                "add_panel": "Add Panel",
+                "panel_name": "Panel Name",
+                "panel_description": "Description",
+                "panel_category": "Category",
+                "panel_created": "Panel Created",
+                "panel_deleted": "Panel Deleted",
+                "panel_updated": "Panel Updated",
+                "no_panels": "No panels available",
+                "panel_list": "Available Panels",
+                "edit_panel": "Edit Panel",
+                "delete_panel": "Delete Panel",
+                "invalid_channel": "Invalid Channel",
+                "invalid_role": "Invalid Role",
+                "channel_set": "Channel Set",
+                "roles_set": "Roles Set",
+                "panel_settings": "Panel Settings",
+                "ticket_name": "Ticket Name",
+                "ticket_description": "Ticket Description",
+                "ticket_category": "Ticket Category",
+                "ticket_color": "Ticket Color",
+                "ticket_emoji": "Ticket Emoji"
+            }
+        }
+    },
+    "tickets": {
+        "created": "Ticket Created",
+        "closed": "Ticket Closed",
+        "transcript": "Ticket Transcript",
+        "error": "Error creating ticket",
+        "no_permission": "No permission",
+        "already_open": "You already have an open ticket",
+        "ticket_info": "Ticket Information",
+        "created_by": "Created by",
+        "created_at": "Created at",
+        "category": "Category",
+        "close_ticket": "Close Ticket",
+        "claim_ticket": "Claim Ticket",
+        "add_user": "Add User",
+        "remove_user": "Remove User",
+        "transcript_sent": "Transcript has been sent",
+        "transcript_error": "Error sending transcript"
+    },
+    "admin": {
+        "reload": {
+            "success": "Modules have been reloaded",
+            "single_success": "Module has been reloaded",
+            "error": "Error reloading module",
+            "no_permission": "You don't have permission to reload modules"
+        },
+        "sync": {
+            "success": "Commands have been synchronized",
+            "error": "Error synchronizing commands",
+            "no_permission": "You don't have permission to synchronize commands"
+        }
+    },
+    "help": {
+        "title": "Help Menu",
+        "description": "Here you can find all available commands. Click on a category to learn more.",
+        "category_description": "Here are all commands in the {category} category.",
+        "not_for_you": "This help menu is not meant for you. Use `/help` to open your own.",
+        "no_description": "No description available",
+        "categories": {
+            "moderation": "Moderation",
+            "tickets": "Tickets",
+            "utility": "Utility",
+            "admin": "Admin"
+        },
+        "buttons": {
+            "main_menu": "Main Menu",
+            "moderation": "Moderation",
+            "tickets": "Tickets",
+            "utility": "Utility",
+            "admin": "Admin"
+        }
+    },
+    "general": {
+        "error": "An error occurred",
+        "success": "Operation successful",
+        "no_permission": "No permission"
+    }
+} 

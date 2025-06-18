@@ -1,0 +1,142 @@
+{
+    "moderation": {
+        "kick": {
+            "success": "Benutzer wurde gekickt",
+            "error": "Fehler beim Kicken des Benutzers",
+            "no_permission": "Du hast keine Berechtigung, Benutzer zu kicken"
+        },
+        "ban": {
+            "success": "Benutzer wurde gebannt",
+            "error": "Fehler beim Bannen des Benutzers",
+            "no_permission": "Du hast keine Berechtigung, Benutzer zu bannen"
+        },
+        "mute": {
+            "success": "Benutzer wurde stummgeschaltet",
+            "error": "Fehler beim Stummschalten des Benutzers",
+            "no_permission": "Du hast keine Berechtigung, Benutzer stummzuschalten"
+        }
+    },
+    "settings": {
+        "language": {
+            "changed": "Sprache wurde auf Deutsch geändert",
+            "current": "Aktuelle Sprache: Deutsch"
+        },
+        "setup": {
+            "title": "Bot Setup",
+            "description": "Konfiguriere die Einstellungen des Bots",
+            "automod": {
+                "title": "AutoMod Einstellungen",
+                "description": "Konfiguriere die automatische Moderation",
+                "status": "Status",
+                "enabled": "Aktiviert",
+                "disabled": "Deaktiviert",
+                "max_mentions": "Maximale Erwähnungen",
+                "max_caps": "Maximaler Großbuchstabenanteil",
+                "banned_words": "Gesperrte Wörter",
+                "none": "Keine",
+                "add_word": "Wort hinzufügen",
+                "word_added": "Wort hinzugefügt",
+                "word_placeholder": "Geben Sie das zu sperrende Wort ein"
+            },
+            "logging": {
+                "title": "Logging Einstellungen",
+                "description": "Konfiguriere das Logging-System",
+                "status": "Status",
+                "enabled": "Aktiviert",
+                "disabled": "Deaktiviert",
+                "channel": "Log-Kanal",
+                "not_found": "Nicht gefunden",
+                "events": "Protokollierte Ereignisse",
+                "select_channel": "Wähle einen Kanal für die Logs:",
+                "channel_set": "Log-Kanal gesetzt"
+            },
+            "tickets": {
+                "title": "Ticket-System Einstellungen",
+                "description": "Konfiguriere das Ticket-System",
+                "status": "Status",
+                "enabled": "Aktiviert",
+                "disabled": "Deaktiviert",
+                "transcript_channel": "Transcript-Kanal",
+                "support_roles": "Support-Rollen",
+                "panels": "Ticket-Panels",
+                "add_panel": "Panel hinzufügen",
+                "panel_name": "Panel-Name",
+                "panel_description": "Beschreibung",
+                "panel_category": "Kategorie",
+                "panel_created": "Panel erstellt",
+                "panel_deleted": "Panel gelöscht",
+                "panel_updated": "Panel aktualisiert",
+                "no_panels": "Keine Panels vorhanden",
+                "panel_list": "Vorhandene Panels",
+                "edit_panel": "Panel bearbeiten",
+                "delete_panel": "Panel löschen",
+                "invalid_channel": "Ungültiger Kanal",
+                "invalid_role": "Ungültige Rolle",
+                "channel_set": "Kanal gesetzt",
+                "roles_set": "Rollen gesetzt",
+                "panel_settings": "Panel-Einstellungen",
+                "ticket_name": "Ticket-Name",
+                "ticket_description": "Ticket-Beschreibung",
+                "ticket_category": "Ticket-Kategorie",
+                "ticket_color": "Ticket-Farbe",
+                "ticket_emoji": "Ticket-Emoji"
+            }
+        }
+    },
+    "tickets": {
+        "created": "Ticket erstellt",
+        "closed": "Ticket geschlossen",
+        "transcript": "Ticket-Transcript",
+        "error": "Fehler beim Erstellen des Tickets",
+        "no_permission": "Keine Berechtigung",
+        "already_open": "Du hast bereits ein offenes Ticket",
+        "ticket_info": "Ticket-Informationen",
+        "created_by": "Erstellt von",
+        "created_at": "Erstellt am",
+        "category": "Kategorie",
+        "close_ticket": "Ticket schließen",
+        "claim_ticket": "Ticket übernehmen",
+        "add_user": "Benutzer hinzufügen",
+        "remove_user": "Benutzer entfernen",
+        "transcript_sent": "Transcript wurde gesendet",
+        "transcript_error": "Fehler beim Senden des Transcripts"
+    },
+    "admin": {
+        "reload": {
+            "success": "Module wurden neu geladen",
+            "single_success": "Modul wurde neu geladen",
+            "error": "Fehler beim Neuladen des Moduls",
+            "no_permission": "Du hast keine Berechtigung, Module neu zu laden"
+        },
+        "sync": {
+            "success": "Befehle wurden synchronisiert",
+            "error": "Fehler beim Synchronisieren der Befehle",
+            "no_permission": "Du hast keine Berechtigung, Befehle zu synchronisieren"
+        }
+    },
+    "help": {
+        "title": "Hilfe-Menü",
+        "description": "Hier findest du alle verfügbaren Befehle. Klicke auf eine Kategorie, um mehr zu erfahren.",
+        "category_description": "Hier findest du alle Befehle der Kategorie {category}.",
+        "not_for_you": "Dieses Hilfe-Menü ist nicht für dich bestimmt. Nutze `/help` um dein eigenes zu öffnen.",
+        "no_description": "Keine Beschreibung verfügbar",
+        "categories": {
+            "moderation": "Moderation",
+            "tickets": "Tickets",
+            "utility": "Utility",
+            "admin": "Admin"
+        },
+        "buttons": {
+            "main_menu": "Hauptmenü",
+            "moderation": "Moderation",
+            "tickets": "Tickets",
+            "utility": "Utility",
+            "admin": "Admin"
+        }
+    },
+    "general": {
+        "error": "Ein Fehler ist aufgetreten",
+        "success": "Operation erfolgreich",
+        "no_permission": "Keine Berechtigung"
+    }
+} 
