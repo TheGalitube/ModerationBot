@@ -51,8 +51,8 @@ A powerful Discord bot with comprehensive moderation, ticket management, warning
 
 1. Clone repository:
 ```bash
-git clone https://github.com/your-username/All-In-One-Mod-Utility.git
-cd All-In-One-Mod-Utility
+git clone https://github.com/TheGalitube/ModerationBot.git
+cd ModerationBot
 ```
 
 2. Install dependencies:
