@@ -136,6 +136,15 @@
         "button": {
             "role_removed": "❌ Die Rolle {role} wurde entfernt",
             "role_added": "✅ Die Rolle {role} wurde hinzugefügt"
+        },
+        "joinrole": {
+            "modal_title": "Beitrittsrolle festlegen",
+            "input_label": "Rollen-ID",
+            "input_placeholder": "Gib die Rollen-ID für neue Mitglieder ein...",
+            "not_found": "Rolle nicht gefunden.",
+            "success_title": "Beitrittsrolle gesetzt",
+            "success_desc": "Neue Mitglieder erhalten jetzt automatisch die Rolle {role}.",
+            "error_title": "Fehler"
         }
     },
     "polls": {
@@ -249,7 +258,35 @@
                 "ticket_category": "Ticket-Kategorie",
                 "ticket_color": "Ticket-Farbe",
                 "ticket_emoji": "Ticket-Emoji"
+            },
+            "buttons": {
+                "automod_settings": "AutoMod Einstellungen",
+                "logging_settings": "Logging Einstellungen",
+                "joinrole_settings": "Beitrittsrolle",
+                "save": "Speichern",
+                "cancel": "Abbrechen",
+                "add_word": "Wort hinzufügen",
+                "toggle_automod": "AutoMod Aktivieren/Deaktivieren",
+                "toggle_logging": "Logging Aktivieren/Deaktivieren",
+                "select_channel": "Log-Kanal auswählen"
+            },
+            "placeholders": {
+                "select_channel": "Kanal auswählen...",
+                "enter_role_id": "Rollen-ID eingeben..."
+            },
+            "joinrole": {
+                "modal_title": "Beitrittsrolle festlegen",
+                "input_label": "Rollen-ID",
+                "input_placeholder": "Gib die Rollen-ID für neue Mitglieder ein...",
+                "not_found": "Rolle nicht gefunden.",
+                "success_title": "Beitrittsrolle gesetzt",
+                "success_desc": "Neue Mitglieder erhalten jetzt automatisch die Rolle {role}.",
+                "error_title": "Fehler"
             }
+        },
+        "languages": {
+            "title": "Unterstützte Sprachcodes",
+            "desc": "Folgende Sprachcodes kannst du für /translate nutzen:\n{list}"
         }
     },
     "tickets": {
@@ -313,5 +350,69 @@
         "error": "Ein Fehler ist aufgetreten",
         "success": "Operation erfolgreich",
         "no_permission": "Keine Berechtigung"
+    },
+    "utility": {
+        "avatar": {
+            "title": "Avatar von {user}"
+        },
+        "remind": {
+            "invalid_time": "Ungültiges Zeitformat. Nutze z.B. 10m, 2h, 1d.",
+            "reminder_set": "Erinnerung gesetzt für {time}: {message}",
+            "reminder_msg": "⏰ Erinnerung: {message}"
+        },
+        "suggest": {
+            "title": "Neuer Vorschlag",
+            "footer": "Vorgeschlagen von {user}",
+            "sent": "Dein Vorschlag wurde gesendet!",
+            "no_channel": "Kein Vorschlagskanal konfiguriert.",
+            "channel_id": "0"
+        },
+        "clear": {
+            "deleted": "{amount} Nachrichten wurden gelöscht."
+        },
+        "slowmode": {
+            "set": "Slowmode auf {seconds} Sekunden gesetzt."
+        },
+        "invite": {
+            "title": "Bot einladen",
+            "desc": "[Hier klicken, um den Bot einzuladen!]({link})",
+            "link": "https://discord.com/oauth2/authorize?client_id=1347211289134633000&scope=bot&permissions=8"
+        },
+        "uptime": {
+            "msg": "Laufzeit: {hours}h {minutes}m {seconds}s"
+        },
+        "ping": {
+            "msg": "Pong! Latenz: {latency}ms"
+        },
+        "lock": {
+            "locked": "🔒 Channel wurde gesperrt. Nutzer können keine Nachrichten mehr senden.",
+            "unlocked": "🔓 Channel wurde entsperrt. Nutzer können wieder schreiben."
+        }
+    },
+    "serverinfo": {
+        "desc": "Hier sind einige Details zu **{guild}**!",
+        "owner": "Besitzer",
+        "id": "Server-ID",
+        "created": "Erstellt am",
+        "members": "Mitglieder",
+        "channels": "Kanäle",
+        "roles_emojis": "Rollen / Emojis / Sticker",
+        "boosts": "Boosts",
+        "boosts_unit": "Boosts",
+        "boost_level": "Level",
+        "security": "Sicherheitsstufe",
+        "features": "Features",
+        "footer": "Ältestes Mitglied: {oldest}"
+    },
+    "info": {
+        "translate": {
+            "fail": "Übersetzung fehlgeschlagen.",
+            "title": "Übersetzung",
+            "desc": "Original: {original}\nÜbersetzt ({lang}): {translated}"
+        },
+        "languages": {
+            "title": "Unterstützte Sprachcodes",
+            "desc": "Folgende Sprachcodes kannst du für /translate nutzen:\n{list}"
+        }
     }
 } 

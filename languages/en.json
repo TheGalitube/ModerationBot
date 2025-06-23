@@ -136,6 +136,15 @@
         "button": {
             "role_removed": "❌ The role {role} has been removed",
             "role_added": "✅ The role {role} has been added"
+        },
+        "joinrole": {
+            "modal_title": "Set Join Role",
+            "input_label": "Role ID",
+            "input_placeholder": "Enter the role ID for new members...",
+            "not_found": "Role not found.",
+            "success_title": "Join Role Set",
+            "success_desc": "New members will now automatically get the role {role}.",
+            "error_title": "Error"
         }
     },
     "polls": {
@@ -249,7 +258,35 @@
                 "ticket_category": "Ticket Category",
                 "ticket_color": "Ticket Color",
                 "ticket_emoji": "Ticket Emoji"
+            },
+            "buttons": {
+                "automod_settings": "AutoMod Settings",
+                "logging_settings": "Logging Settings",
+                "joinrole_settings": "Join Role Settings",
+                "save": "Save",
+                "cancel": "Cancel",
+                "add_word": "Add Word",
+                "toggle_automod": "Enable/Disable AutoMod",
+                "toggle_logging": "Enable/Disable Logging",
+                "select_channel": "Select Log Channel"
+            },
+            "placeholders": {
+                "select_channel": "Select a channel...",
+                "enter_role_id": "Enter the role ID..."
+            },
+            "joinrole": {
+                "modal_title": "Set Join Role",
+                "input_label": "Role ID",
+                "input_placeholder": "Enter the role ID for new members...",
+                "not_found": "Role not found.",
+                "success_title": "Join Role Set",
+                "success_desc": "New members will now automatically get the role {role}.",
+                "error_title": "Error"
             }
+        },
+        "languages": {
+            "title": "Supported Language Codes",
+            "desc": "You can use the following language codes for /translate:\n{list}"
         }
     },
     "tickets": {
@@ -313,5 +350,75 @@
         "error": "An error occurred",
         "success": "Operation successful",
         "no_permission": "No permission"
+    },
+    "utility": {
+        "avatar": {
+            "title": "Avatar of {user}"
+        },
+        "remind": {
+            "invalid_time": "Invalid time format. Use e.g. 10m, 2h, 1d.",
+            "reminder_set": "Reminder set for {time}: {message}",
+            "reminder_msg": "⏰ Reminder: {message}"
+        },
+        "suggest": {
+            "title": "New Suggestion",
+            "footer": "Suggested by {user}",
+            "sent": "Your suggestion has been sent!",
+            "no_channel": "No suggestion channel configured.",
+            "channel_id": "0"
+        },
+        "clear": {
+            "deleted": "{amount} messages have been deleted."
+        },
+        "slowmode": {
+            "set": "Slowmode set to {seconds} seconds."
+        },
+        "invite": {
+            "title": "Invite the Bot",
+            "desc": "[Click here to invite the bot!]({link})",
+            "link": "https://discord.com/oauth2/authorize?client_id=1347211289134633000&scope=bot&permissions=8"
+        },
+        "uptime": {
+            "msg": "Uptime: {hours}h {minutes}m {seconds}s"
+        },
+        "ping": {
+            "msg": "Pong! Latency: {latency}ms"
+        },
+        "lock": {
+            "locked": "🔒 Channel has been locked. Users can no longer send messages.",
+            "unlocked": "🔓 Channel has been unlocked. Users can send messages again."
+        }
+    },
+    "serverinfo": {
+        "desc": "Here are some details about **{guild}**!",
+        "owner": "Owner",
+        "id": "Server ID",
+        "created": "Created at",
+        "members": "Members",
+        "channels": "Channels",
+        "roles_emojis": "Roles / Emojis / Stickers",
+        "boosts": "Boosts",
+        "boosts_unit": "Boosts",
+        "boost_level": "Level",
+        "security": "Security Level",
+        "features": "Features",
+        "footer": "Oldest member: {oldest}"
+    },
+    "info": {
+        "translate": {
+            "fail": "Translation failed.",
+            "title": "Translation",
+            "desc": "Original: {original}\nTranslated ({lang}): {translated}"
+        },
+        "languages": {
+            "title": "Supported Language Codes",
+            "desc": "You can use the following language codes for /translate:\n{list}"
+        },
+        "weather": {
+            "no_api_key": "No API key for weather service set.",
+            "not_found": "Could not find weather for {city}.",
+            "title": "Weather in {city}",
+            "desc": "{desc}\nTemperature: {temp}°C (feels like {feels}°C)\nHumidity: {humidity}%\nWind: {wind} m/s"
+        }
     }
 } 
