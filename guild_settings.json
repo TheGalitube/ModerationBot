@@ -1,6 +1,6 @@
 {
     "1070719324358201374": {
-        "language": "de",
+        "language": "en",
         "tickets": {
             "enabled": false,
             "transcript_channel": 1070721140017877044,
@@ -37,6 +37,43 @@
         }
     },
     "1384554800137371688": {
-        "language": "en"
+        "language": "en",
+        "tickets": {
+            "enabled": false,
+            "transcript_channel": null,
+            "support_roles": [
+                1386791822428209375
+            ],
+            "panels": [
+                {
+                    "id": "0",
+                    "name": "Ticket System DEMO",
+                    "description": "Hello User, this is a demo version of the ticket system with this bot. Feel free to test everything out.",
+                    "category_id": 1386792206186057889
+                }
+            ]
+        },
+        "logging": {
+            "enabled": false,
+            "channel": null,
+            "events": {
+                "member_join": true,
+                "member_leave": true,
+                "message_delete": true,
+                "message_edit": true,
+                "member_ban": true,
+                "member_unban": true,
+                "member_kick": true
+            }
+        },
+        "automod": {
+            "enabled": false,
+            "banned_words": [],
+            "max_mentions": 3,
+            "max_caps": 70
+        },
+        "roles": {
+            "autorole": "1384935018140536964"
+        }
     }
 }

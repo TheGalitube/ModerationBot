@@ -11,6 +11,24 @@ class SetupView(discord.ui.View):
         self.guild_id = str(guild_id)
         self.load_settings()
         self.load_languages()
+        lang = self.get_language(self.guild_id)
+        language = self.de if lang == "de" else self.en
+        # Buttons dynamisch mit Sprachdatei-Label
+        self.add_item(discord.ui.Button(
+            label=language["settings"]["setup"]["buttons"]["automod_settings"],
+            style=discord.ButtonStyle.primary,
+            custom_id="automod_settings"
+        ))
+        self.add_item(discord.ui.Button(
+            label=language["settings"]["setup"]["buttons"]["logging_settings"],
+            style=discord.ButtonStyle.primary,
+            custom_id="logging_settings"
+        ))
+        self.add_item(discord.ui.Button(
+            label=language["settings"]["setup"]["buttons"]["joinrole_settings"],
+            style=discord.ButtonStyle.primary,
+            custom_id="joinrole_settings"
+        ))
 
     def load_languages(self):
         with open('languages/de.json', 'r', encoding='utf-8') as f:
@@ -85,17 +103,27 @@ class SetupView(discord.ui.View):
             except Exception:
                 pass  # Fehler ignorieren, da wir nicht wissen, welche Module geladen sind
 
-    @discord.ui.button(label="AutoMod Einstellungen", style=discord.ButtonStyle.primary, custom_id="automod_settings")
-    async def automod_settings(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Button-Callbacks anhand custom_id
+        if interaction.data.get("custom_id") == "automod_settings":
+            await self.automod_settings(interaction)
+            return False
+        if interaction.data.get("custom_id") == "logging_settings":
+            await self.logging_settings(interaction)
+            return False
+        if interaction.data.get("custom_id") == "joinrole_settings":
+            await self.joinrole_settings(interaction)
+            return False
+        return True
+
+    async def automod_settings(self, interaction: discord.Interaction):
         lang = self.get_language(interaction.guild_id)
         language = self.de if lang == "de" else self.en
-        
         embed = discord.Embed(
             title=language["settings"]["setup"]["automod"]["title"],
             description=language["settings"]["setup"]["automod"]["description"],
             color=discord.Color.blue()
         )
-        
         settings = self.settings[self.guild_id]['automod']
         embed.add_field(
             name=language["settings"]["setup"]["automod"]["status"],
@@ -117,28 +145,23 @@ class SetupView(discord.ui.View):
             value="\n".join(settings['banned_words']) if settings['banned_words'] else language["settings"]["setup"]["automod"]["none"],
             inline=False
         )
-
         view = AutoModView(self.bot, self.guild_id)
         await interaction.response.send_message(embed=embed, view=view)
 
-    @discord.ui.button(label="Logging Einstellungen", style=discord.ButtonStyle.primary, custom_id="logging_settings")
-    async def logging_settings(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def logging_settings(self, interaction: discord.Interaction):
         lang = self.get_language(interaction.guild_id)
         language = self.de if lang == "de" else self.en
-        
         embed = discord.Embed(
             title=language["settings"]["setup"]["logging"]["title"],
             description=language["settings"]["setup"]["logging"]["description"],
             color=discord.Color.blue()
         )
-        
         settings = self.settings[self.guild_id]['logging']
         embed.add_field(
             name=language["settings"]["setup"]["logging"]["status"],
             value=language["settings"]["setup"]["logging"]["enabled"] if settings['enabled'] else language["settings"]["setup"]["logging"]["disabled"],
             inline=False
         )
-        
         if settings['channel']:
             channel = interaction.guild.get_channel(settings['channel'])
             embed.add_field(
@@ -146,7 +169,6 @@ class SetupView(discord.ui.View):
                 value=channel.mention if channel else language["settings"]["setup"]["logging"]["not_found"],
                 inline=False
             )
-        
         events = settings['events']
         event_list = "\n".join([f"{'✅' if enabled else '❌'} {event}" for event, enabled in events.items()])
         embed.add_field(
@@ -154,9 +176,44 @@ class SetupView(discord.ui.View):
             value=event_list,
             inline=False
         )
-
         view = LoggingView(self.bot, self.guild_id)
         await interaction.response.send_message(embed=embed, view=view)
+
+    async def joinrole_settings(self, interaction: discord.Interaction):
+        lang = self.get_language(interaction.guild_id)
+        language = self.de if lang == "de" else self.en
+        class JoinRoleModal(discord.ui.Modal, title=language["settings"]["setup"]["joinrole"]["modal_title"]):
+            role_id = discord.ui.TextInput(
+                label=language["settings"]["setup"]["joinrole"]["input_label"],
+                placeholder=language["settings"]["setup"]["joinrole"]["input_placeholder"],
+                required=True
+            )
+            async def on_submit(self, interaction: discord.Interaction):
+                try:
+                    role = interaction.guild.get_role(int(self.role_id.value))
+                    if not role:
+                        raise ValueError(language["settings"]["setup"]["joinrole"]["not_found"])
+                    # Speichere die Autorole
+                    if "roles" not in self.view.settings[self.view.guild_id]:
+                        self.view.settings[self.view.guild_id]["roles"] = {}
+                    self.view.settings[self.view.guild_id]["roles"]["autorole"] = str(role.id)
+                    self.view.save_settings()
+                    embed = discord.Embed(
+                        title=language["settings"]["setup"]["joinrole"]["success_title"],
+                        description=language["settings"]["setup"]["joinrole"]["success_desc"].format(role=role.mention),
+                        color=discord.Color.green()
+                    )
+                    await interaction.response.send_message(embed=embed, ephemeral=True)
+                except Exception as e:
+                    embed = discord.Embed(
+                        title=language["settings"]["setup"]["joinrole"]["error_title"],
+                        description=str(e),
+                        color=discord.Color.red()
+                    )
+                    await interaction.response.send_message(embed=embed, ephemeral=True)
+        modal = JoinRoleModal()
+        modal.view = self
+        await interaction.response.send_modal(modal)
 
 class AutoModView(discord.ui.View):
     def __init__(self, bot, guild_id):
