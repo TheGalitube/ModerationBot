@@ -33,7 +33,7 @@ class Moderation(commands.Cog):
             await user.kick(reason=reason)
             embed = discord.Embed(
                 title=language["moderation"]["kick"]["success"],
-                description=f"Benutzer: {user.mention}\nGrund: {reason or 'Kein Grund angegeben'}",
+                description=language["moderation"]["kick"]["description"].format(user=user.mention, reason=reason or language["moderation"]["kick"]["no_reason"]),
                 color=discord.Color.green()
             )
             await interaction.response.send_message(embed=embed)
@@ -53,6 +53,48 @@ class Moderation(commands.Cog):
         if isinstance(error, app_commands.MissingPermissions):
             embed = discord.Embed(
                 title=language["moderation"]["kick"]["no_permission"],
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed)
+        else:
+            embed = discord.Embed(
+                title=language["general"]["error"],
+                description=str(error),
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(name="ban", description="Bans a user from the server")
+    @app_commands.checks.has_permissions(ban_members=True)
+    async def ban(self, interaction: discord.Interaction, user: discord.Member, reason: str = None):
+        """Bans a user from the server"""
+        lang = self.get_language(interaction.guild_id)
+        language = self.de if lang == "de" else self.en
+
+        try:
+            await user.ban(reason=reason)
+            embed = discord.Embed(
+                title=language["moderation"]["ban"]["success"],
+                description=language["moderation"]["ban"]["description"].format(user=user.mention, reason=reason or language["moderation"]["ban"]["no_reason"]),
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed)
+        except Exception as e:
+            embed = discord.Embed(
+                title=language["moderation"]["ban"]["error"],
+                description=str(e),
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed)
+
+    @ban.error
+    async def ban_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        lang = self.get_language(interaction.guild_id)
+        language = self.de if lang == "de" else self.en
+        
+        if isinstance(error, app_commands.MissingPermissions):
+            embed = discord.Embed(
+                title=language["moderation"]["ban"]["no_permission"],
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=embed)

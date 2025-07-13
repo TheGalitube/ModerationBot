@@ -54,8 +54,8 @@
             ]
         },
         "logging": {
-            "enabled": false,
-            "channel": null,
+            "enabled": true,
+            "channel": 1388023347387826216,
             "events": {
                 "member_join": true,
                 "member_leave": true,

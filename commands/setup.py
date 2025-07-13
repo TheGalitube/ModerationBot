@@ -91,7 +91,8 @@ class SetupView(discord.ui.View):
             json.dump(self.settings, f, indent=4)
         
         # Alle relevanten Cogs neu laden, um Änderungen sofort anzuwenden
-        self.apply_changes()
+        # apply_changes() ist async, aber hier können wir es nicht awaiten
+        # Die Änderungen werden beim nächsten Reload angewendet
     
     async def apply_changes(self):
         # Liste der Cogs, die bei Einstellungsänderungen neu geladen werden sollen
@@ -149,71 +150,14 @@ class SetupView(discord.ui.View):
         await interaction.response.send_message(embed=embed, view=view)
 
     async def logging_settings(self, interaction: discord.Interaction):
-        lang = self.get_language(interaction.guild_id)
-        language = self.de if lang == "de" else self.en
-        embed = discord.Embed(
-            title=language["settings"]["setup"]["logging"]["title"],
-            description=language["settings"]["setup"]["logging"]["description"],
-            color=discord.Color.blue()
-        )
-        settings = self.settings[self.guild_id]['logging']
-        embed.add_field(
-            name=language["settings"]["setup"]["logging"]["status"],
-            value=language["settings"]["setup"]["logging"]["enabled"] if settings['enabled'] else language["settings"]["setup"]["logging"]["disabled"],
-            inline=False
-        )
-        if settings['channel']:
-            channel = interaction.guild.get_channel(settings['channel'])
-            embed.add_field(
-                name=language["settings"]["setup"]["logging"]["channel"],
-                value=channel.mention if channel else language["settings"]["setup"]["logging"]["not_found"],
-                inline=False
-            )
-        events = settings['events']
-        event_list = "\n".join([f"{'✅' if enabled else '❌'} {event}" for event, enabled in events.items()])
-        embed.add_field(
-            name=language["settings"]["setup"]["logging"]["events"],
-            value=event_list,
-            inline=False
-        )
         view = LoggingView(self.bot, self.guild_id)
+        embed = view.create_logging_embed(interaction)
         await interaction.response.send_message(embed=embed, view=view)
 
     async def joinrole_settings(self, interaction: discord.Interaction):
-        lang = self.get_language(interaction.guild_id)
-        language = self.de if lang == "de" else self.en
-        class JoinRoleModal(discord.ui.Modal, title=language["settings"]["setup"]["joinrole"]["modal_title"]):
-            role_id = discord.ui.TextInput(
-                label=language["settings"]["setup"]["joinrole"]["input_label"],
-                placeholder=language["settings"]["setup"]["joinrole"]["input_placeholder"],
-                required=True
-            )
-            async def on_submit(self, interaction: discord.Interaction):
-                try:
-                    role = interaction.guild.get_role(int(self.role_id.value))
-                    if not role:
-                        raise ValueError(language["settings"]["setup"]["joinrole"]["not_found"])
-                    # Speichere die Autorole
-                    if "roles" not in self.view.settings[self.view.guild_id]:
-                        self.view.settings[self.view.guild_id]["roles"] = {}
-                    self.view.settings[self.view.guild_id]["roles"]["autorole"] = str(role.id)
-                    self.view.save_settings()
-                    embed = discord.Embed(
-                        title=language["settings"]["setup"]["joinrole"]["success_title"],
-                        description=language["settings"]["setup"]["joinrole"]["success_desc"].format(role=role.mention),
-                        color=discord.Color.green()
-                    )
-                    await interaction.response.send_message(embed=embed, ephemeral=True)
-                except Exception as e:
-                    embed = discord.Embed(
-                        title=language["settings"]["setup"]["joinrole"]["error_title"],
-                        description=str(e),
-                        color=discord.Color.red()
-                    )
-                    await interaction.response.send_message(embed=embed, ephemeral=True)
-        modal = JoinRoleModal()
-        modal.view = self
-        await interaction.response.send_modal(modal)
+        view = JoinRoleView(self.bot, self.guild_id)
+        embed = view.create_joinrole_embed(interaction)
+        await interaction.response.send_message(embed=embed, view=view)
 
 class AutoModView(discord.ui.View):
     def __init__(self, bot, guild_id):
@@ -231,7 +175,7 @@ class AutoModView(discord.ui.View):
             json.dump(self.settings, f, indent=4)
         
         # Relevante Cogs neu laden
-        self.apply_changes()
+        # apply_changes() ist async, aber hier können wir es nicht awaiten
     
     async def apply_changes(self):
         try:
@@ -263,17 +207,31 @@ class LoggingView(discord.ui.View):
         self.bot = bot
         self.guild_id = str(guild_id)
         self.load_settings()
+        self.load_languages()
 
     def load_settings(self):
         with open('guild_settings.json', 'r') as f:
             self.settings = json.load(f)
+
+    def load_languages(self):
+        with open('languages/de.json', 'r', encoding='utf-8') as f:
+            self.de = json.load(f)
+        with open('languages/en.json', 'r', encoding='utf-8') as f:
+            self.en = json.load(f)
+
+    def get_language(self, guild_id):
+        if os.path.exists('guild_settings.json'):
+            with open('guild_settings.json', 'r') as f:
+                settings = json.load(f)
+                return settings.get(str(guild_id), {}).get('language', 'de')
+        return 'de'
 
     def save_settings(self):
         with open('guild_settings.json', 'w') as f:
             json.dump(self.settings, f, indent=4)
         
         # Relevante Cogs neu laden
-        self.apply_changes()
+        # apply_changes() ist async, aber hier können wir es nicht awaiten
     
     async def apply_changes(self):
         try:
@@ -281,18 +239,47 @@ class LoggingView(discord.ui.View):
         except Exception:
             pass  # Fehler ignorieren
 
+    def create_logging_embed(self, interaction: discord.Interaction):
+        """Erstellt ein aktuelles Logging-Embed basierend auf den aktuellen Einstellungen"""
+        lang = self.get_language(interaction.guild_id)
+        language = self.de if lang == "de" else self.en
+        
+        embed = discord.Embed(
+            title=language["settings"]["setup"]["logging"]["title"],
+            description=language["settings"]["setup"]["logging"]["description"],
+            color=discord.Color.blue()
+        )
+        settings = self.settings[self.guild_id]['logging']
+        embed.add_field(
+            name=language["settings"]["setup"]["logging"]["status"],
+            value=language["settings"]["setup"]["logging"]["enabled"] if settings['enabled'] else language["settings"]["setup"]["logging"]["disabled"],
+            inline=False
+        )
+        if settings['channel']:
+            channel = interaction.guild.get_channel(settings['channel'])
+            embed.add_field(
+                name=language["settings"]["setup"]["logging"]["channel"],
+                value=channel.mention if channel else language["settings"]["setup"]["logging"]["not_found"],
+                inline=False
+            )
+        events = settings['events']
+        event_list = "\n".join([f"{'✅' if enabled else '❌'} {event}" for event, enabled in events.items()])
+        embed.add_field(
+            name=language["settings"]["setup"]["logging"]["events"],
+            value=event_list,
+            inline=False
+        )
+        return embed
+
     @discord.ui.button(label="Logging Aktivieren/Deaktivieren", style=discord.ButtonStyle.success, custom_id="toggle_logging")
     async def toggle_logging(self, interaction: discord.Interaction, button: discord.ui.Button):
         settings = self.settings[self.guild_id]['logging']
         settings['enabled'] = not settings['enabled']
         self.save_settings()
         
-        embed = discord.Embed(
-            title="Logging Status geändert",
-            description=f"Logging ist jetzt {'aktiviert' if settings['enabled'] else 'deaktiviert'}",
-            color=discord.Color.green()
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        # Embed live aktualisieren
+        updated_embed = self.create_logging_embed(interaction)
+        await interaction.response.edit_message(embed=updated_embed, view=self)
 
     @discord.ui.button(label="Log-Kanal auswählen", style=discord.ButtonStyle.primary, custom_id="select_channel")
     async def select_channel(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -316,18 +303,160 @@ class LoggingView(discord.ui.View):
             settings['channel'] = int(select.values[0])
             self.save_settings()
             
-            embed = discord.Embed(
-                title="Log-Kanal gesetzt",
-                description=f"Der Log-Kanal wurde auf {interaction.guild.get_channel(int(select.values[0])).mention} gesetzt",
-                color=discord.Color.green()
-            )
-            await interaction.response.send_message(embed=embed, ephemeral=True)
+            # Embed live aktualisieren
+            updated_embed = self.create_logging_embed(interaction)
+            await interaction.response.edit_message(embed=updated_embed, view=self)
         
         select.callback = select_callback
         view = discord.ui.View()
         view.add_item(select)
         
         await interaction.response.send_message("Wähle einen Kanal für die Logs:", view=view, ephemeral=True)
+
+class JoinRoleView(discord.ui.View):
+    def __init__(self, bot, guild_id):
+        super().__init__(timeout=None)
+        self.bot = bot
+        self.guild_id = str(guild_id)
+        self.load_settings()
+        self.load_languages()
+
+    def load_settings(self):
+        with open('guild_settings.json', 'r') as f:
+            self.settings = json.load(f)
+
+    def load_languages(self):
+        with open('languages/de.json', 'r', encoding='utf-8') as f:
+            self.de = json.load(f)
+        with open('languages/en.json', 'r', encoding='utf-8') as f:
+            self.en = json.load(f)
+
+    def get_language(self, guild_id):
+        if os.path.exists('guild_settings.json'):
+            with open('guild_settings.json', 'r') as f:
+                settings = json.load(f)
+                return settings.get(str(guild_id), {}).get('language', 'de')
+        return 'de'
+
+    def save_settings(self):
+        with open('guild_settings.json', 'w') as f:
+            json.dump(self.settings, f, indent=4)
+        
+        # Relevante Cogs neu laden
+        # apply_changes() ist async, aber hier können wir es nicht awaiten
+    
+    async def apply_changes(self):
+        try:
+            await self.bot.reload_extension("commands.roles")
+        except Exception:
+            pass  # Fehler ignorieren
+
+    def create_joinrole_embed(self, interaction: discord.Interaction):
+        """Erstellt ein aktuelles Join-Role Embed basierend auf den aktuellen Einstellungen"""
+        lang = self.get_language(interaction.guild_id)
+        language = self.de if lang == "de" else self.en
+        
+        embed = discord.Embed(
+            title="Beitrittsrolle Einstellungen" if lang == "de" else "Join Role Settings",
+            description="Konfiguriere die automatische Rollenvergabe für neue Mitglieder" if lang == "de" else "Configure automatic role assignment for new members",
+            color=discord.Color.blue()
+        )
+        
+        # Aktuelle Join-Role anzeigen
+        current_role = None
+        if "roles" in self.settings[self.guild_id] and "autorole" in self.settings[self.guild_id]["roles"]:
+            role_id = int(self.settings[self.guild_id]["roles"]["autorole"])
+            current_role = interaction.guild.get_role(role_id)
+        
+        if current_role:
+            embed.add_field(
+                name="Aktuelle Join-Role" if lang == "de" else "Current Join Role",
+                value=current_role.mention,
+                inline=False
+            )
+        else:
+            embed.add_field(
+                name="Aktuelle Join-Role" if lang == "de" else "Current Join Role",
+                value="Nicht festgelegt" if lang == "de" else "Not set",
+                inline=False
+            )
+        
+        return embed
+
+    @discord.ui.button(label="Join-Role festlegen", style=discord.ButtonStyle.primary, custom_id="set_joinrole")
+    async def set_joinrole(self, interaction: discord.Interaction, button: discord.ui.Button):
+        lang = self.get_language(interaction.guild_id)
+        language = self.de if lang == "de" else self.en
+        # Dropdown mit allen verfügbaren Rollen
+        roles = [role for role in interaction.guild.roles if role.name != "@everyone"]
+        options = [
+            discord.SelectOption(
+                label=role.name,
+                value=str(role.id),
+                description=f"ID: {role.id}"
+            ) for role in roles[:25]  # Discord limit: 25 options
+        ]
+        
+        select = discord.ui.Select(
+            placeholder="Wähle eine Rolle aus..." if lang == "de" else "Select a role...",
+            options=options,
+            custom_id="role_select"
+        )
+        
+        async def select_callback(interaction: discord.Interaction):
+            lang = self.get_language(interaction.guild_id)
+            language = self.de if lang == "de" else self.en
+            
+            try:
+                role = interaction.guild.get_role(int(select.values[0]))
+                if not role:
+                    raise ValueError("Rolle nicht gefunden." if lang == "de" else "Role not found.")
+                
+                # Speichere die Autorole
+                if "roles" not in self.settings[self.guild_id]:
+                    self.settings[self.guild_id]["roles"] = {}
+                self.settings[self.guild_id]["roles"]["autorole"] = str(role.id)
+                self.save_settings()
+                
+                # Embed live aktualisieren
+                updated_embed = self.create_joinrole_embed(interaction)
+                await interaction.response.edit_message(embed=updated_embed, view=self)
+                
+            except Exception as e:
+                embed = discord.Embed(
+                    title="Fehler" if lang == "de" else "Error",
+                    description=str(e),
+                    color=discord.Color.red()
+                )
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+        
+        select.callback = select_callback
+        view = discord.ui.View()
+        view.add_item(select)
+        
+        lang = self.get_language(interaction.guild_id)
+        language = self.de if lang == "de" else self.en
+        await interaction.response.send_message("Wähle eine Rolle für neue Mitglieder:" if lang == "de" else "Select a role for new members:", view=view, ephemeral=True)
+
+    @discord.ui.button(label="Join-Role entfernen", style=discord.ButtonStyle.danger, custom_id="remove_joinrole")
+    async def remove_joinrole(self, interaction: discord.Interaction, button: discord.ui.Button):
+        lang = self.get_language(interaction.guild_id)
+        language = self.de if lang == "de" else self.en
+        
+        if "roles" in self.settings[self.guild_id] and "autorole" in self.settings[self.guild_id]["roles"]:
+            del self.settings[self.guild_id]["roles"]["autorole"]
+            self.save_settings()
+            
+            # Embed live aktualisieren
+            updated_embed = self.create_joinrole_embed(interaction)
+            await interaction.response.edit_message(embed=updated_embed, view=self)
+        else:
+            embed = discord.Embed(
+                title="Keine Join-Role festgelegt" if lang == "de" else "No Join Role Set",
+                description="Es ist keine Join-Role festgelegt, die entfernt werden könnte." if lang == "de" else "There is no join role set that could be removed.",
+                color=discord.Color.orange()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
 class AddWordModal(discord.ui.Modal, title="Wort hinzufügen"):
     def __init__(self, view):

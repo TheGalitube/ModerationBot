@@ -3,12 +3,16 @@
         "kick": {
             "success": "User has been kicked",
             "error": "Error kicking the user",
-            "no_permission": "You don't have permission to kick users"
+            "no_permission": "You don't have permission to kick users",
+            "description": "User: {user}\nReason: {reason}",
+            "no_reason": "No reason provided"
         },
         "ban": {
             "success": "User has been banned",
             "error": "Error banning the user",
-            "no_permission": "You don't have permission to ban users"
+            "no_permission": "You don't have permission to ban users",
+            "description": "User: {user}\nReason: {reason}",
+            "no_reason": "No reason provided"
         },
         "mute": {
             "success": "User has been muted",
@@ -138,13 +142,21 @@
             "role_added": "✅ The role {role} has been added"
         },
         "joinrole": {
+            "title": "Join Role Settings",
+            "description": "Configure automatic role assignment for new members",
+            "current_role": "Current Join Role",
+            "not_set": "Not set",
             "modal_title": "Set Join Role",
             "input_label": "Role ID",
             "input_placeholder": "Enter the role ID for new members...",
             "not_found": "Role not found.",
             "success_title": "Join Role Set",
             "success_desc": "New members will now automatically get the role {role}.",
-            "error_title": "Error"
+            "error_title": "Error",
+            "select_placeholder": "Select a role...",
+            "select_message": "Select a role for new members:",
+            "no_role_title": "No Join Role Set",
+            "no_role_desc": "There is no join role set that could be removed."
         }
     },
     "polls": {
@@ -160,7 +172,7 @@
             "description_placeholder": "Additional description of the poll",
             "poll_created": "Poll created",
             "poll_created_by": "Created by {user}",
-            "ends_at": "Ends at {time}",
+            "ends_at": "Ends {time}",
             "vote_with_reactions": "Vote using the reactions",
             "invalid_duration": "Invalid time format. Use e.g. 1h, 30m, 2d",
             "min_options": "At least 2 options required",
@@ -192,6 +204,20 @@
         "reactions": {
             "duplicate_reaction": "You have already voted for this option",
             "reaction_removed": "Your vote has been removed"
+        },
+        "options": {
+            "yes": "Yes",
+            "no": "No"
+        },
+        "end_poll": {
+            "title": "End Poll",
+            "description": "Select a poll to end",
+            "no_polls": "No active polls found",
+            "poll_ended": "Poll successfully ended",
+            "poll_ended_desc": "The poll has been manually ended",
+            "ended_by": "Ended by {user}",
+            "select_poll": "Select Poll",
+            "poll_option": "{question} (Ends: {time})"
         }
     },
     "settings": {
@@ -350,6 +376,79 @@
         "error": "An error occurred",
         "success": "Operation successful",
         "no_permission": "No permission"
+    },
+    "logging": {
+        "member_join": {
+            "title": "👋 Member Joined",
+            "description": "{member} has joined the server",
+            "user": "User",
+            "id": "ID",
+            "account_created": "Account Created"
+        },
+        "member_leave": {
+            "title": "👋 Member Left",
+            "description": "{member} has left the server",
+            "user": "User",
+            "id": "ID",
+            "joined": "Joined"
+        },
+        "message_delete": {
+            "title": "🗑️ Message Deleted",
+            "description": "A message from {author} was deleted",
+            "author": "Author",
+            "channel": "Channel",
+            "content": "Content",
+            "attachments": "Attachments",
+            "no_text": "No text"
+        },
+        "message_edit": {
+            "title": "✏️ Message Edited",
+            "description": "A message from {author} was edited",
+            "author": "Author",
+            "channel": "Channel",
+            "before": "Before",
+            "after": "After",
+            "link": "Link",
+            "no_text": "No text"
+        },
+        "member_ban": {
+            "title": "🔨 Member Banned",
+            "description": "{user} has been banned from the server",
+            "user": "User",
+            "id": "ID"
+        },
+        "member_unban": {
+            "title": "🔓 Member Unbanned",
+            "description": "{user} has been unbanned from the server",
+            "user": "User",
+            "id": "ID"
+        },
+        "nickname_change": {
+            "title": "📝 Nickname Changed",
+            "description": "The nickname of {member} was changed",
+            "before": "Before",
+            "after": "After"
+        },
+        "role_change": {
+            "title": "🏷️ Roles Changed",
+            "description": "The roles of {member} were changed",
+            "added": "Added",
+            "removed": "Removed"
+        },
+        "channel_create": {
+            "title": "📝 Channel Created",
+            "description": "A new channel was created: {channel}",
+            "name": "Name",
+            "type": "Type",
+            "id": "ID"
+        },
+        "channel_delete": {
+            "title": "🗑️ Channel Deleted",
+            "description": "A channel was deleted: #{name}",
+            "name": "Name",
+            "type": "Type",
+            "id": "ID"
+        }
     },
     "utility": {
         "avatar": {

@@ -11,6 +11,9 @@ load_dotenv()
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
+intents.guilds = True
+intents.guild_messages = True
+intents.guild_reactions = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
@@ -41,6 +44,9 @@ async def on_ready():
     for filename in os.listdir('./commands'):
         if filename.endswith('.py'):
             await bot.load_extension(f'commands.{filename[:-3]}')
+    # Logging-Cog laden (falls nicht automatisch)
+    if not any([cog for cog in bot.cogs if cog.lower() == 'logging']):
+        await bot.load_extension('commands.logging')
     
     try:
         synced = await bot.tree.sync()
