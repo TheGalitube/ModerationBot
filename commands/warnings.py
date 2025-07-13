@@ -179,7 +179,7 @@ class Warnings(commands.Cog):
         for warning in warnings:
             moderator = interaction.guild.get_member(int(warning["moderator"]))
             moderator_name = moderator.mention if moderator else language["warnings"]["warnings"]["unknown_moderator"]
-            timestamp = datetime.fromisoformat(warning["timestamp"]).strftime("%d.%m.%Y %H:%M")
+            timestamp = f"<t:{int(datetime.fromisoformat(warning['timestamp']).timestamp())}:F>"
             
             embed.add_field(
                 name=language["warnings"]["warnings"]["warning_info"].format(id=warning['id']),

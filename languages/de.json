@@ -138,13 +138,21 @@
             "role_added": "✅ Die Rolle {role} wurde hinzugefügt"
         },
         "joinrole": {
+            "title": "Beitrittsrolle Einstellungen",
+            "description": "Konfiguriere die automatische Rollenvergabe für neue Mitglieder",
+            "current_role": "Aktuelle Join-Role",
+            "not_set": "Nicht festgelegt",
             "modal_title": "Beitrittsrolle festlegen",
             "input_label": "Rollen-ID",
             "input_placeholder": "Gib die Rollen-ID für neue Mitglieder ein...",
             "not_found": "Rolle nicht gefunden.",
             "success_title": "Beitrittsrolle gesetzt",
             "success_desc": "Neue Mitglieder erhalten jetzt automatisch die Rolle {role}.",
-            "error_title": "Fehler"
+            "error_title": "Fehler",
+            "select_placeholder": "Wähle eine Rolle aus...",
+            "select_message": "Wähle eine Rolle für neue Mitglieder:",
+            "no_role_title": "Keine Join-Role festgelegt",
+            "no_role_desc": "Es ist keine Join-Role festgelegt, die entfernt werden könnte."
         }
     },
     "polls": {
@@ -160,7 +168,7 @@
             "description_placeholder": "Zusätzliche Beschreibung der Umfrage",
             "poll_created": "Umfrage erstellt",
             "poll_created_by": "Erstellt von {user}",
-            "ends_at": "Endet um {time}",
+            "ends_at": "Endet {time}",
             "vote_with_reactions": "Stimme mit den Reaktionen ab",
             "invalid_duration": "Ungültiges Zeitformat. Verwende z.B. 1h, 30m, 2d",
             "min_options": "Mindestens 2 Optionen erforderlich",
@@ -192,6 +200,20 @@
         "reactions": {
             "duplicate_reaction": "Du hast bereits für diese Option gestimmt",
             "reaction_removed": "Deine Stimme wurde entfernt"
+        },
+        "options": {
+            "yes": "Ja",
+            "no": "Nein"
+        },
+        "end_poll": {
+            "title": "Umfrage beenden",
+            "description": "Wähle eine Umfrage aus, die beendet werden soll",
+            "no_polls": "Keine aktiven Umfragen gefunden",
+            "poll_ended": "Umfrage erfolgreich beendet",
+            "poll_ended_desc": "Die Umfrage wurde manuell beendet",
+            "ended_by": "Beendet von {user}",
+            "select_poll": "Umfrage auswählen",
+            "poll_option": "{question} (Endet: {time})"
         }
     },
     "settings": {
@@ -350,6 +372,79 @@
         "error": "Ein Fehler ist aufgetreten",
         "success": "Operation erfolgreich",
         "no_permission": "Keine Berechtigung"
+    },
+    "logging": {
+        "member_join": {
+            "title": "👋 Mitglied beigetreten",
+            "description": "{member} ist dem Server beigetreten",
+            "user": "Benutzer",
+            "id": "ID",
+            "account_created": "Account erstellt"
+        },
+        "member_leave": {
+            "title": "👋 Mitglied verlassen",
+            "description": "{member} hat den Server verlassen",
+            "user": "Benutzer",
+            "id": "ID",
+            "joined": "Beigetreten"
+        },
+        "message_delete": {
+            "title": "🗑️ Nachricht gelöscht",
+            "description": "Eine Nachricht von {author} wurde gelöscht",
+            "author": "Autor",
+            "channel": "Kanal",
+            "content": "Inhalt",
+            "attachments": "Anhänge",
+            "no_text": "Kein Text"
+        },
+        "message_edit": {
+            "title": "✏️ Nachricht bearbeitet",
+            "description": "Eine Nachricht von {author} wurde bearbeitet",
+            "author": "Autor",
+            "channel": "Kanal",
+            "before": "Vorher",
+            "after": "Nachher",
+            "link": "Link",
+            "no_text": "Kein Text"
+        },
+        "member_ban": {
+            "title": "🔨 Mitglied gebannt",
+            "description": "{user} wurde vom Server gebannt",
+            "user": "Benutzer",
+            "id": "ID"
+        },
+        "member_unban": {
+            "title": "🔓 Mitglied entbannt",
+            "description": "{user} wurde vom Server entbannt",
+            "user": "Benutzer",
+            "id": "ID"
+        },
+        "nickname_change": {
+            "title": "📝 Nickname geändert",
+            "description": "Der Nickname von {member} wurde geändert",
+            "before": "Vorher",
+            "after": "Nachher"
+        },
+        "role_change": {
+            "title": "🏷️ Rollen geändert",
+            "description": "Die Rollen von {member} wurden geändert",
+            "added": "Hinzugefügt",
+            "removed": "Entfernt"
+        },
+        "channel_create": {
+            "title": "📝 Kanal erstellt",
+            "description": "Ein neuer Kanal wurde erstellt: {channel}",
+            "name": "Name",
+            "type": "Typ",
+            "id": "ID"
+        },
+        "channel_delete": {
+            "title": "🗑️ Kanal gelöscht",
+            "description": "Ein Kanal wurde gelöscht: #{name}",
+            "name": "Name",
+            "type": "Typ",
+            "id": "ID"
+        }
     },
     "utility": {
         "avatar": {

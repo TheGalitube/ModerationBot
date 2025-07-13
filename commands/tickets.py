@@ -75,7 +75,7 @@ class TicketView(discord.ui.View):
             color=discord.Color.green()
         )
         embed.add_field(name="Category", value=panel['name'], inline=False)
-        embed.add_field(name="Created at", value=datetime.now().strftime("%d.%m.%Y %H:%M"), inline=False)
+        embed.add_field(name="Created at", value=f"<t:{int(datetime.now().timestamp())}:F>", inline=False)
 
         # Erstelle die Ticket-Buttons
         view = TicketControlView(self.bot, self.guild_id, channel.id)
@@ -203,7 +203,7 @@ class TicketControlView(discord.ui.View):
                     # Open Time
                     embed.add_field(
                         name="⏱️ Open Time",
-                        value=ticket_opened_at or datetime.now().strftime("%d.%m.%Y %H:%M"),
+                        value=ticket_opened_at or f"<t:{int(datetime.now().timestamp())}:F>",
                         inline=True
                     )
                     
@@ -222,7 +222,7 @@ class TicketControlView(discord.ui.View):
                     )
                     
                     # Set footer
-                    embed.set_footer(text=f"Today at {datetime.now().strftime('%H:%M')}")
+                    embed.set_footer(text=f"Today at <t:{int(datetime.now().timestamp())}:t>")
                     
                     # Sende das Transcript mit dem Embed
                     transcript_message = await transcript_channel.send(
@@ -1508,7 +1508,7 @@ class Tickets(commands.Cog):
                         # Open Time
                         embed.add_field(
                             name="⏱️ Open Time",
-                            value=ticket_opened_at or datetime.now().strftime("%d.%m.%Y %H:%M"),
+                            value=ticket_opened_at or f"<t:{int(datetime.now().timestamp())}:F>",
                             inline=True
                         )
                         
@@ -1527,7 +1527,7 @@ class Tickets(commands.Cog):
                         )
                         
                         # Set footer
-                        embed.set_footer(text=f"Today at {datetime.now().strftime('%H:%M')}")
+                        embed.set_footer(text=f"Today at <t:{int(datetime.now().timestamp())}:t>")
                         
                         # Sende das Transcript mit dem Embed
                         transcript_message = await transcript_channel.send(
@@ -1728,7 +1728,7 @@ class Tickets(commands.Cog):
                             # Open Time
                             embed.add_field(
                                 name="⏱️ Open Time",
-                                value=ticket_opened_at or datetime.now().strftime("%d.%m.%Y %H:%M"),
+                                value=ticket_opened_at or f"<t:{int(datetime.now().timestamp())}:F>",
                                 inline=True
                             )
                             
@@ -1747,7 +1747,7 @@ class Tickets(commands.Cog):
                             )
                             
                             # Set footer
-                            embed.set_footer(text=f"Today at {datetime.now().strftime('%H:%M')}")
+                            embed.set_footer(text=f"Today at <t:{int(datetime.now().timestamp())}:t>")
                             
                             # Sende das Transcript mit dem Embed
                             transcript_message = await transcript_channel.send(

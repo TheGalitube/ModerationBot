@@ -163,12 +163,12 @@ class Utility(commands.Cog):
         # Zeitstempel
         embed.add_field(
             name="Beigetreten",
-            value=user.joined_at.strftime("%d.%m.%Y %H:%M"),
+            value=f"<t:{int(user.joined_at.timestamp())}:F>",
             inline=True
         )
         embed.add_field(
             name="Account erstellt",
-            value=user.created_at.strftime("%d.%m.%Y %H:%M"),
+            value=f"<t:{int(user.created_at.timestamp())}:F>",
             inline=True
         )
         

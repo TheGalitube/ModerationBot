@@ -8,9 +8,13 @@ import re
 import asyncio
 
 class PollModal(discord.ui.Modal, title="Create Poll"):
-    def __init__(self, poll_type="normal"):
+    def __init__(self, poll_type="normal", de=None, en=None, active_polls=None, save_polls_func=None):
         super().__init__()
         self.poll_type = poll_type
+        self.de = de
+        self.en = en
+        self.active_polls = active_polls
+        self.save_polls = save_polls_func
         
         self.question_input = discord.ui.TextInput(
             label="Question",
@@ -89,7 +93,7 @@ class PollModal(discord.ui.Modal, title="Create Poll"):
                 await interaction.response.send_message(language["polls"]["create_poll"]["max_options"], ephemeral=True)
                 return
         else:
-            options = ["Ja", "Nein"]
+            options = [language["polls"]["options"]["yes"], language["polls"]["options"]["no"]]
 
         end_time = datetime.now() + timedelta(seconds=duration_seconds)
         
@@ -100,7 +104,7 @@ class PollModal(discord.ui.Modal, title="Create Poll"):
             timestamp=end_time
         )
         embed.add_field(name=language["polls"]["create_poll"]["poll_created_by"].format(user=interaction.user.name), value="", inline=False)
-        embed.add_field(name=language["polls"]["create_poll"]["ends_at"].format(time=end_time.strftime("%d.%m.%Y %H:%M")), value="", inline=False)
+        embed.add_field(name=language["polls"]["create_poll"]["ends_at"].format(time=f"<t:{int(end_time.timestamp())}:R>"), value="", inline=False)
         embed.add_field(name=language["polls"]["create_poll"]["vote_with_reactions"], value="", inline=False)
         
         # Füge Optionen hinzu
@@ -156,6 +160,8 @@ class Polls(commands.Cog):
         self.bot = bot
         self.load_languages()
         self.load_polls()
+        # Starte den Poll-Check Task
+        self.bot.loop.create_task(self.poll_checker())
 
     def load_languages(self):
         with open('languages/de.json', 'r', encoding='utf-8') as f:
@@ -186,15 +192,91 @@ class Polls(commands.Cog):
     @app_commands.checks.has_permissions(manage_messages=True)
     async def poll(self, interaction: discord.Interaction):
         """Create a poll"""
-        modal = PollModal("normal")
+        modal = PollModal("normal", self.de, self.en, self.active_polls, self.save_polls)
         await interaction.response.send_modal(modal)
 
     @app_commands.command(name="quickpoll", description="Create a yes/no poll")
     @app_commands.checks.has_permissions(manage_messages=True)
     async def quickpoll(self, interaction: discord.Interaction):
         """Create a yes/no poll"""
-        modal = PollModal("quick")
+        modal = PollModal("quick", self.de, self.en, self.active_polls, self.save_polls)
         await interaction.response.send_modal(modal)
+
+    @app_commands.command(name="endpoll", description="End a poll manually")
+    @app_commands.checks.has_permissions(manage_messages=True)
+    async def endpoll(self, interaction: discord.Interaction):
+        """End a poll manually"""
+        lang = self.get_language(interaction.guild_id)
+        language = self.de if lang == "de" else self.en
+        
+        guild_id = str(interaction.guild_id)
+        
+        # Prüfe ob es aktive Polls gibt
+        if guild_id not in self.active_polls or not self.active_polls[guild_id]:
+            embed = discord.Embed(
+                title=language["polls"]["end_poll"]["title"],
+                description=language["polls"]["end_poll"]["no_polls"],
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+        
+        # Erstelle Dropdown-Optionen
+        options = []
+        for message_id, poll_data in self.active_polls[guild_id].items():
+            end_time = datetime.fromisoformat(poll_data["end_time"])
+            option_label = language["polls"]["end_poll"]["poll_option"].format(
+                question=poll_data["question"][:50] + "..." if len(poll_data["question"]) > 50 else poll_data["question"],
+                time=f"<t:{int(end_time.timestamp())}:R>"
+            )
+            options.append(discord.SelectOption(
+                label=option_label,
+                value=message_id,
+                description=f"Endet {f'<t:{int(end_time.timestamp())}:R>'}"
+            ))
+        
+        # Erstelle das Dropdown
+        select = discord.ui.Select(
+            placeholder=language["polls"]["end_poll"]["select_poll"],
+            options=options,
+            min_values=1,
+            max_values=1
+        )
+        
+        async def select_callback(interaction: discord.Interaction):
+            selected_message_id = select.values[0]
+            
+            # Beende die ausgewählte Poll
+            await self.end_poll(guild_id, selected_message_id)
+            
+            # Bestätigungs-Embed
+            embed = discord.Embed(
+                title=language["polls"]["end_poll"]["poll_ended"],
+                description=language["polls"]["end_poll"]["poll_ended_desc"],
+                color=discord.Color.green()
+            )
+            embed.add_field(
+                name=language["polls"]["end_poll"]["ended_by"],
+                value=interaction.user.mention,
+                inline=False
+            )
+            
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+        
+        select.callback = select_callback
+        
+        # Erstelle die View
+        view = discord.ui.View()
+        view.add_item(select)
+        
+        # Sende das Dropdown
+        embed = discord.Embed(
+            title=language["polls"]["end_poll"]["title"],
+            description=language["polls"]["end_poll"]["description"],
+            color=discord.Color.blue()
+        )
+        
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
     @app_commands.command(name="pollresults", description="Show poll results")
     @app_commands.checks.has_permissions(manage_messages=True)
@@ -363,8 +445,37 @@ class Polls(commands.Cog):
                 del poll_data["votes"][user_id]
             self.save_polls()
 
+    async def poll_checker(self):
+        """Prüft regelmäßig, ob Polls beendet werden müssen"""
+        await self.bot.wait_until_ready()
+        
+        while not self.bot.is_closed():
+            try:
+                current_time = datetime.now()
+                polls_to_end = []
+                
+                # Finde Polls, die beendet werden müssen
+                for guild_id in self.active_polls:
+                    for message_id in self.active_polls[guild_id]:
+                        poll_data = self.active_polls[guild_id][message_id]
+                        end_time = datetime.fromisoformat(poll_data["end_time"])
+                        
+                        if current_time >= end_time:
+                            polls_to_end.append((guild_id, message_id))
+                
+                # Beende die Polls
+                for guild_id, message_id in polls_to_end:
+                    await self.end_poll(guild_id, message_id)
+                
+                # Warte 1 Sekunde bis zur nächsten Prüfung
+                await asyncio.sleep(1)
+                
+            except Exception as e:
+                await asyncio.sleep(1)
+
     async def end_poll(self, guild_id, message_id):
         """Beendet eine Umfrage und zeigt die Ergebnisse"""
+        
         if guild_id not in self.active_polls or message_id not in self.active_polls[guild_id]:
             return
         
@@ -414,7 +525,7 @@ class Polls(commands.Cog):
             self.save_polls()
             
         except Exception as e:
-            print(f"Fehler beim Beenden der Umfrage: {e}")
+            pass
 
     @poll.error
     async def poll_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
@@ -437,6 +548,25 @@ class Polls(commands.Cog):
 
     @quickpoll.error
     async def quickpoll_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        lang = self.get_language(interaction.guild_id)
+        language = self.de if lang == "de" else self.en
+
+        if isinstance(error, app_commands.MissingPermissions):
+            embed = discord.Embed(
+                title=language["general"]["no_permission"],
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed)
+        else:
+            embed = discord.Embed(
+                title=language["general"]["error"],
+                description=str(error),
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed)
+
+    @endpoll.error
+    async def endpoll_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         lang = self.get_language(interaction.guild_id)
         language = self.de if lang == "de" else self.en
 

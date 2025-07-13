@@ -227,7 +227,7 @@ class Roles(commands.Cog):
             embed.add_field(name=language["roles"]["roleinfo"]["permissions"], value=", ".join(permissions[:10]) + ("..." if len(permissions) > 10 else ""), inline=False)
         
         # Erstellungsdatum
-        embed.add_field(name=language["roles"]["roleinfo"]["created_at"], value=role.created_at.strftime("%d.%m.%Y %H:%M"), inline=True)
+        embed.add_field(name=language["roles"]["roleinfo"]["created_at"], value=f"<t:{int(role.created_at.timestamp())}:F>", inline=True)
         
         embed.set_thumbnail(url=role.guild.icon.url if role.guild.icon else None)
         
@@ -361,36 +361,57 @@ class Roles(commands.Cog):
             color=discord.Color.blue()
         )
         
-        if guild_id in self.role_settings:
-            settings = self.role_settings[guild_id]
-            
-            # Autorole
-            if "autorole" in settings:
-                autorole = interaction.guild.get_role(int(settings["autorole"]))
-                if autorole:
-                    embed.add_field(name=language["roles"]["rolesettings"]["autorole"], value=autorole.mention, inline=True)
-                else:
-                    embed.add_field(name=language["roles"]["rolesettings"]["autorole"], value=language["roles"]["rolesettings"]["role_not_found"], inline=True)
-            else:
-                embed.add_field(name=language["roles"]["rolesettings"]["autorole"], value=language["roles"]["rolesettings"]["not_set"], inline=True)
-            
-            # Self-Role Panels
-            if "selfroles" in settings:
-                panel_count = len(settings["selfroles"])
-                embed.add_field(name=language["roles"]["rolesettings"]["selfrole_panels"], value=str(panel_count), inline=True)
-            else:
-                embed.add_field(name=language["roles"]["rolesettings"]["selfrole_panels"], value="0", inline=True)
+        # Prüfe neue guild_settings.json
+        autorole = None
+        if os.path.exists('guild_settings.json'):
+            with open('guild_settings.json', 'r') as f:
+                settings = json.load(f)
+                
+            if guild_id in settings and "roles" in settings[guild_id] and "autorole" in settings[guild_id]["roles"]:
+                autorole = interaction.guild.get_role(int(settings[guild_id]["roles"]["autorole"]))
+        
+        # Fallback: Prüfe alte role_settings.json
+        if not autorole and guild_id in self.role_settings and "autorole" in self.role_settings[guild_id]:
+            autorole = interaction.guild.get_role(int(self.role_settings[guild_id]["autorole"]))
+        
+        # Autorole anzeigen
+        if autorole:
+            embed.add_field(name=language["roles"]["rolesettings"]["autorole"], value=autorole.mention, inline=True)
         else:
             embed.add_field(name=language["roles"]["rolesettings"]["autorole"], value=language["roles"]["rolesettings"]["not_set"], inline=True)
+        
+        # Self-Role Panels (nur aus alter role_settings.json)
+        if guild_id in self.role_settings and "selfroles" in self.role_settings[guild_id]:
+            panel_count = len(self.role_settings[guild_id]["selfroles"])
+            embed.add_field(name=language["roles"]["rolesettings"]["selfrole_panels"], value=str(panel_count), inline=True)
+        else:
             embed.add_field(name=language["roles"]["rolesettings"]["selfrole_panels"], value="0", inline=True)
         
         await interaction.response.send_message(embed=embed)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        """Gibt neuen Mitgliedern automatisch die Join-Role"""
         guild_id = str(member.guild.id)
         
-        if guild_id in self.role_settings and "autorole" in self.role_settings[guild_id]:
+        # Prüfe guild_settings.json für Join-Role
+        if os.path.exists('guild_settings.json'):
+            with open('guild_settings.json', 'r') as f:
+                settings = json.load(f)
+                
+            if guild_id in settings and "roles" in settings[guild_id] and "autorole" in settings[guild_id]["roles"]:
+                role_id = int(settings[guild_id]["roles"]["autorole"])
+                role = member.guild.get_role(role_id)
+                
+                if role:
+                    try:
+                        await member.add_roles(role)
+                        print(f"Join-Role {role.name} wurde {member.name} zugewiesen")
+                    except Exception as e:
+                        print(f"Fehler beim Zuweisen der Join-Role: {e}")
+        
+        # Fallback: Prüfe alte role_settings.json
+        elif guild_id in self.role_settings and "autorole" in self.role_settings[guild_id]:
             role_id = int(self.role_settings[guild_id]["autorole"])
             role = member.guild.get_role(role_id)
             
