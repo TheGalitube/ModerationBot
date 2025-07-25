@@ -108,7 +108,7 @@ class PollModal(discord.ui.Modal, title="Create Poll"):
         embed.add_field(name=language["polls"]["create_poll"]["vote_with_reactions"], value="", inline=False)
         
         # Füge Optionen hinzu
-        emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+        emojis = ["1\ufe0f\u20e3", "2\ufe0f\u20e3", "3\ufe0f\u20e3", "4\ufe0f\u20e3", "5\ufe0f\u20e3", "6\ufe0f\u20e3", "7\ufe0f\u20e3", "8\ufe0f\u20e3", "9\ufe0f\u20e3", "\ud83d\udd1f"]
         options_text = ""
         for i, option in enumerate(options):
             options_text += f"{emojis[i]} {option}\n"
@@ -382,7 +382,7 @@ class Polls(commands.Cog):
             return
         
         poll_data = self.active_polls[guild_id][message_id]
-        emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+        emojis = ["1\ufe0f\u20e3", "2\ufe0f\u20e3", "3\ufe0f\u20e3", "4\ufe0f\u20e3", "5\ufe0f\u20e3", "6\ufe0f\u20e3", "7\ufe0f\u20e3", "8\ufe0f\u20e3", "9\ufe0f\u20e3", "\ud83d\udd1f"]
         
         # Finde die Option für diese Reaktion
         option_index = None
@@ -423,7 +423,7 @@ class Polls(commands.Cog):
             return
         
         poll_data = self.active_polls[guild_id][message_id]
-        emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+        emojis = ["1\ufe0f\u20e3", "2\ufe0f\u20e3", "3\ufe0f\u20e3", "4\ufe0f\u20e3", "5\ufe0f\u20e3", "6\ufe0f\u20e3", "7\ufe0f\u20e3", "8\ufe0f\u20e3", "9\ufe0f\u20e3", "\ud83d\udd1f"]
         
         # Finde die Option für diese Reaktion
         option_index = None

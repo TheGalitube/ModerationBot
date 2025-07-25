@@ -331,7 +331,14 @@
         "add_user": "Add User",
         "remove_user": "Remove User",
         "transcript_sent": "Transcript has been sent",
-        "transcript_error": "Error sending transcript"
+        "transcript_error": "Error sending transcript",
+        "transfer_ticket": "Transfer ticket",
+        "transfer_success": "Ticket was successfully transferred to {user}.",
+        "transfer_error": "Error transferring the ticket.",
+        "transfer_no_permission": "You do not have permission to transfer this ticket.",
+        "transfer_not_claimed": "This ticket has not been claimed yet and cannot be transferred.",
+        "transfer_invalid_target": "Invalid target user or the user is already the ticket owner.",
+        "transfer_info": "The ticket has been transferred to {user}."
     },
     "admin": {
         "reload": {

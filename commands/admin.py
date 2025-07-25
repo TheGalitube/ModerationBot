@@ -26,7 +26,6 @@ class Admin(commands.Cog):
     @app_commands.command(name="reload", description="Reload modules without restarting the bot")
     @app_commands.checks.has_permissions(administrator=True)
     async def reload(self, interaction: discord.Interaction, module: str = None):
-        """Reload modules without restarting the bot"""
         lang = self.get_language(interaction.guild_id)
         language = self.de if lang == "de" else self.en
         
@@ -58,16 +57,16 @@ class Admin(commands.Cog):
                     module_name = filename[:-3]
                     try:
                         await self.bot.reload_extension(f"commands.{module_name}")
-                        results.append(f"✅ `{module_name}`")
+                        results.append(f" 197 `{module_name}`")
                     except Exception as e:
-                        results.append(f"❌ `{module_name}`: {str(e)}")
+                        results.append(f" 6ab `{module_name}`: {str(e)}")
             
             # Befehle synchronisieren
             try:
                 synced = await self.bot.tree.sync()
-                results.append(f"🔄 {len(synced)} Befehle synchronisiert!")
+                results.append(f" 504 {len(synced)} Befehle synchronisiert!")
             except Exception as e:
-                results.append(f"❌ Fehler beim Synchronisieren der Befehle: {str(e)}")
+                results.append(f" 6ab Fehler beim Synchronisieren der Befehle: {str(e)}")
             
             embed = discord.Embed(
                 title=language["admin"]["reload"]["success"],
@@ -79,7 +78,6 @@ class Admin(commands.Cog):
     @app_commands.command(name="sync", description="Sync commands with Discord")
     @app_commands.checks.has_permissions(administrator=True)
     async def sync(self, interaction: discord.Interaction):
-        """Sync commands with Discord"""
         lang = self.get_language(interaction.guild_id)
         language = self.de if lang == "de" else self.en
         

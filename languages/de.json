@@ -331,7 +331,14 @@
         "add_user": "Benutzer hinzufügen",
         "remove_user": "Benutzer entfernen",
         "transcript_sent": "Transcript wurde gesendet",
-        "transcript_error": "Fehler beim Senden des Transcripts"
+        "transcript_error": "Fehler beim Senden des Transcripts",
+        "transfer_ticket": "Ticket transferieren",
+        "transfer_success": "Ticket wurde erfolgreich an {user} übertragen.",
+        "transfer_error": "Fehler beim Übertragen des Tickets.",
+        "transfer_no_permission": "Du hast keine Berechtigung, dieses Ticket zu übertragen.",
+        "transfer_not_claimed": "Dieses Ticket wurde noch nicht übernommen und kann nicht übertragen werden.",
+        "transfer_invalid_target": "Ungültiger Zielnutzer oder der Nutzer ist bereits der Besitzer des Tickets.",
+        "transfer_info": "Das Ticket wurde an {user} übertragen."
     },
     "admin": {
         "reload": {

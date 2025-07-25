@@ -105,8 +105,7 @@ class TicketControlView(discord.ui.View):
         with open('guild_settings.json', 'r') as f:
             self.settings = json.load(f)
 
-    @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.danger, custom_id="close_ticket")
-    async def close_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def do_close_ticket(self, interaction, closed_by):
         channel = interaction.channel
         if not channel or not channel.name.startswith("ticket-"):
             return
@@ -116,10 +115,9 @@ class TicketControlView(discord.ui.View):
         # Extrahiere die Ticket-ID
         ticket_id_match = None
         try:
-            # Versuche die Ticket-ID aus dem Namen zu extrahieren
             ticket_parts = channel.name.split("-")
             if len(ticket_parts) >= 3:
-                ticket_id_match = ticket_parts[-1]  # Die letzte Zahl als ID
+                ticket_id_match = ticket_parts[-1]
         except:
             ticket_id_match = "Unknown"
 
@@ -129,7 +127,6 @@ class TicketControlView(discord.ui.View):
         async for message in channel.history(limit=1, oldest_first=True):
             for embed in message.embeds:
                 if "Ticket from" in embed.description:
-                    # Extrahiere den Benutzer aus der Beschreibung
                     for field in embed.fields:
                         if field.name == "Created at":
                             ticket_opened_at = field.value
@@ -143,7 +140,17 @@ class TicketControlView(discord.ui.View):
 
         # Finde, ob das Ticket beansprucht wurde
         ticket_claimed_by = "Not claimed"
-        
+        async for message in channel.history(limit=10, oldest_first=True):
+            for embed in message.embeds:
+                for field in embed.fields:
+                    if field.name == "Claimed by":
+                        ticket_claimed_by = field.value
+                        break
+                if ticket_claimed_by != "Not claimed":
+                    break
+            if ticket_claimed_by != "Not claimed":
+                break
+
         # Benutzer informieren
         await channel.send("Ticket is being closed and transcript is being created...")
 
@@ -166,83 +173,57 @@ class TicketControlView(discord.ui.View):
                 transcript_channel = interaction.guild.get_channel(int(transcript_channel_id))
                 if transcript_channel:
                     transcript_text = "\n".join(transcript)
-                    
-                    # Erstelle das Transcript als Datei
                     transcript_file = discord.File(
                         io.StringIO(transcript_text),
                         filename=f"transcript-{channel.name}.txt"
                     )
-                    
-                    # Erstelle das schöne Embed für das Transcript
                     embed = discord.Embed(
                         title="Ticket Closed",
                         color=discord.Color.red()
                     )
-                    
-                    # Ticket ID
                     embed.add_field(
                         name="🎫 Ticket ID",
                         value=ticket_id_match or "Unknown",
                         inline=True
                     )
-                    
-                    # Opened By
                     embed.add_field(
                         name="✅ Opened By",
                         value=ticket_opener.mention if ticket_opener else "Unknown",
                         inline=True
                     )
-                    
-                    # Closed By
                     embed.add_field(
                         name="❌ Closed By",
-                        value=interaction.user.mention,
+                        value=closed_by.mention if closed_by else interaction.user.mention,
                         inline=True
                     )
-                    
-                    # Open Time
                     embed.add_field(
                         name="⏱️ Open Time",
                         value=ticket_opened_at or f"<t:{int(datetime.now().timestamp())}:F>",
                         inline=True
                     )
-                    
-                    # Claimed By
                     embed.add_field(
                         name="👤 Claimed By",
                         value=ticket_claimed_by,
                         inline=True
                     )
-                    
-                    # Reason
                     embed.add_field(
                         name="📝 Reason",
-                        value="No reason specified",
+                        value="Closed by /close command",
                         inline=False
                     )
-                    
-                    # Set footer
                     embed.set_footer(text=f"Today at <t:{int(datetime.now().timestamp())}:t>")
-                    
-                    # Sende das Transcript mit dem Embed
                     transcript_message = await transcript_channel.send(
                         embed=embed,
                         file=transcript_file
                     )
-                    
-                    # Füge den Button zum Anzeigen des Transcripts hinzu
                     view = TranscriptView(transcript_file.filename)
                     await transcript_message.edit(view=view)
-                    
-                    # Informiere den Benutzer über erfolgreiches Transcript
                     try:
                         await interaction.followup.send("Transcript has been created and saved!")
                     except:
                         pass
         except Exception as e:
             print(f"Error sending transcript: {e}")
-
-        # Ticket-Kanal nach kurzer Verzögerung löschen
         await asyncio.sleep(3)
         try:
             await channel.delete()
@@ -252,6 +233,10 @@ class TicketControlView(discord.ui.View):
                 await interaction.followup.send(f"Error deleting channel: {e}")
             except:
                 pass
+
+    @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.danger, custom_id="close_ticket")
+    async def close_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.do_close_ticket(interaction, interaction.user)
 
 class TranscriptView(discord.ui.View):
     def __init__(self, filename):
@@ -616,8 +601,8 @@ class SetTranscriptModal(discord.ui.Modal, title="Set Transcript Channel"):
                 await interaction.response.send_message(embed=embed, ephemeral=True)
                 return
 
-            if channel.type != discord.ChannelType.category:
-                raise ValueError("The specified channel is not a category")
+            if not isinstance(channel, discord.TextChannel):
+                raise ValueError("The specified channel is not a text channel")
 
             # Speichere die Einstellung
             self.view.settings[self.view.guild_id]['tickets']['transcript_channel'] = channel_id
@@ -1402,7 +1387,7 @@ class Tickets(commands.Cog):
         
         if ticket_view:
             # Die close_ticket-Methode direkt aufrufen
-            await ticket_view.close_ticket(interaction, None)
+            await ticket_view.do_close_ticket(interaction, interaction.user)
         else:
             # Fallback, falls wir die View nicht finden konnten
             # Extrahiere die Ticket-ID
@@ -1769,6 +1754,123 @@ class Tickets(commands.Cog):
                     print(f"Error deleting ticket channel: {e}")
         except Exception as e:
             print(f"Error closing ticket after delay: {e}")
+
+    @app_commands.command(name="transfer", description="Transfers the claimed ticket to another support member")
+    async def transfer_ticket(self, interaction: discord.Interaction, target: discord.Member):
+        lang = self.get_language(interaction.guild_id)
+        language = self.de if lang == "de" else self.en
+
+        channel = interaction.channel
+        if not channel or not channel.name.startswith("ticket-"):
+            embed = discord.Embed(
+                title=language["general"]["error"],
+                description=language["tickets"]["error"],
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+
+        # Prüfen, ob der Benutzer berechtigt ist (Support-Rolle oder Admin)
+        has_support_role = False
+        with open('guild_settings.json', 'r') as f:
+            settings = json.load(f)
+        guild_id = str(interaction.guild.id)
+        if guild_id in settings and 'tickets' in settings[guild_id]:
+            support_roles = settings[guild_id]['tickets'].get('support_roles', [])
+            for role_id in support_roles:
+                role = interaction.guild.get_role(int(role_id))
+                if role and role in interaction.user.roles:
+                    has_support_role = True
+                    break
+        if not has_support_role and not interaction.user.guild_permissions.administrator:
+            embed = discord.Embed(
+                title=language["general"]["error"],
+                description=language["tickets"]["transfer_no_permission"],
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+
+        # Suche nach dem ersten Embed im Kanal und prüfe, ob das Ticket geclaimt ist
+        try:
+            async for message in channel.history(limit=10, oldest_first=True):
+                if message.embeds and "Ticket from" in message.embeds[0].description:
+                    embed = message.embeds[0]
+                    claimed_by = None
+                    claimed_field = None
+                    for i, field in enumerate(embed.fields):
+                        if field.name == "Claimed by":
+                            claimed_by = field.value
+                            claimed_field = i
+                            break
+                    if not claimed_by or claimed_by == "Not claimed":
+                        embed = discord.Embed(
+                            title=language["general"]["error"],
+                            description=language["tickets"]["transfer_not_claimed"],
+                            color=discord.Color.red()
+                        )
+                        await interaction.response.send_message(embed=embed, ephemeral=True)
+                        return
+                    # Prüfe, ob der Command-User der aktuelle Claimer ist oder Admin
+                    if (claimed_by != interaction.user.mention and not interaction.user.guild_permissions.administrator):
+                        embed = discord.Embed(
+                            title=language["general"]["error"],
+                            description=language["tickets"]["transfer_no_permission"],
+                            color=discord.Color.red()
+                        )
+                        await interaction.response.send_message(embed=embed, ephemeral=True)
+                        return
+                    # Ziel prüfen
+                    if target.mention == claimed_by:
+                        embed = discord.Embed(
+                            title=language["general"]["error"],
+                            description=language["tickets"]["transfer_invalid_target"],
+                            color=discord.Color.red()
+                        )
+                        await interaction.response.send_message(embed=embed, ephemeral=True)
+                        return
+                    # Support-Rolle prüfen
+                    is_support = False
+                    for role_id in support_roles:
+                        role = interaction.guild.get_role(int(role_id))
+                        if role and role in target.roles:
+                            is_support = True
+                            break
+                    if not is_support and not target.guild_permissions.administrator:
+                        embed = discord.Embed(
+                            title=language["general"]["error"],
+                            description=language["tickets"]["transfer_invalid_target"],
+                            color=discord.Color.red()
+                        )
+                        await interaction.response.send_message(embed=embed, ephemeral=True)
+                        return
+                    # Transfer durchführen
+                    embed.set_field_at(claimed_field, name="Claimed by", value=target.mention, inline=False)
+                    await message.edit(embed=embed)
+                    # Erfolgsmeldung
+                    embed_success = discord.Embed(
+                        title=language["tickets"]["transfer_ticket"],
+                        description=language["tickets"]["transfer_success"].format(user=target.mention),
+                        color=discord.Color.green()
+                    )
+                    await interaction.response.send_message(embed=embed_success)
+                    # Info ins Ticket (entfernt)
+                    # await channel.send(language["tickets"]["transfer_info"].format(user=target.mention))
+                    return
+            # Kein Embed gefunden
+            embed = discord.Embed(
+                title=language["general"]["error"],
+                description=language["tickets"]["error"],
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+        except Exception as e:
+            embed = discord.Embed(
+                title=language["general"]["error"],
+                description=language["tickets"]["transfer_error"] + f" ({str(e)})",
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @ticketsetup.error
     async def ticketsetup_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):

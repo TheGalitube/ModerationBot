@@ -52,7 +52,6 @@ class Info(commands.Cog):
     async def languages(self, interaction: discord.Interaction):
         lang = self.get_language(interaction.guild_id)
         language = self.de if lang == "de" else self.en
-        # Liste der unterstützten Sprachcodes (LibreTranslate Standard)
         codes = [
             ("en", "English"),
             ("de", "Deutsch"),

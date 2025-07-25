@@ -40,7 +40,7 @@
         "language": "en",
         "tickets": {
             "enabled": false,
-            "transcript_channel": null,
+            "transcript_channel": 1398277849080791170,
             "support_roles": [
                 1386791822428209375
             ],
